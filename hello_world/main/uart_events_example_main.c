@@ -38,6 +38,7 @@ static QueueHandle_t uart0_queue;
 
 extern void gatts_app_main(void);
 extern void gattc_app_main(void);
+extern void connect_to_peripheral(uint8_t *p_addr);
 
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
 {
@@ -48,8 +49,9 @@ void parse_at_cmd(uint8_t *p_data,uint8_t length)
     else if(!strncmp("cent",(char *)p_data,4)){
         gattc_app_main();
     }
-    else if(!strncmp("conn",(char *)p_data,4)){
-        printf("get conn\r\n");
+    else if(!strncmp("conn8",(char *)p_data,4)){
+        uint8_t bt_addr[6] = {0x24,0x0a,0xc4,0x61,0xb3,0x9e};
+        connect_to_peripheral(bt_addr);
     }
 }
 
