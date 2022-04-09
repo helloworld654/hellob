@@ -46,6 +46,16 @@ extern void gatts_app_main(void);
 extern void gattc_app_main(void);
 extern void connect_to_peripheral(uint8_t *p_addr);
 
+void print_paras(uint8_t argc,char *argv[])
+{
+    uint8_t i;
+    printf("printf the paras:\r\n");
+    for(i=0;i<argc;i++){
+        printf("%s**",argv[i]);
+    }
+    printf("\r\n");
+}
+
 void start_ble_peripheral(uint8_t argc,char *argv[])
 {
     gatts_app_main();
@@ -56,7 +66,21 @@ void start_ble_central(uint8_t argc,char *argv[])
     gattc_app_main();
 }
 
-cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central}};
+void establish_connection(uint8_t argc,char *argv[])
+{
+    uint8_t i,bt_addr[6];
+    for(i=0;i<12;i+=2){
+        bt_addr[i/2] = str_to_num(argv[1]+i,2);
+    }
+    printf("connect to bt addr:");
+    for(i=0;i<6;i++){
+        printf("%02x ",bt_addr[i]);
+    }
+    printf("\r\n");
+    connect_to_peripheral(bt_addr);
+}
+
+cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection}};
 
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
 {
@@ -83,33 +107,6 @@ void parse_at_cmd(uint8_t *p_data,uint8_t length)
             cms_num_struct[i].cmd_func(cmd_index,p_cmd);
             break;
         }
-    }
-}
-
-void parse_at_cmd1(uint8_t *p_data,uint8_t length)
-{
-    printf("start parse string\r\n");
-    if(!strncmp("peri",(char *)p_data,4)){
-        gatts_app_main();
-    }
-    else if(!strncmp("cent",(char *)p_data,4)){
-        gattc_app_main();
-    }
-    else if(!strncmp("conn8",(char *)p_data,5)){
-        uint8_t bt_addr1[6] = {0x24,0x0a,0xc4,0x61,0xb3,0x9e};
-        printf("connect ot bt addr:");
-        for(uint8_t i=0;i<6;i++)
-            printf("%02x ",bt_addr1[i]);
-        printf("\r\n");
-        connect_to_peripheral(bt_addr1);
-    }
-    else if(!strncmp("conn7",(char *)p_data,5)){
-        uint8_t bt_addr2[6] = {0x58,0xbf,0x25,0x33,0x44,0xe6};
-        printf("connect ot bt addr:");
-        for(uint8_t i=0;i<6;i++)
-            printf("%02x ",bt_addr2[i]);
-        printf("\r\n");
-        connect_to_peripheral(bt_addr2);
     }
 }
 
