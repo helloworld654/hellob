@@ -36,6 +36,23 @@ static const char *TAG = "uart_events";
 #define RD_BUF_SIZE (BUF_SIZE)
 static QueueHandle_t uart0_queue;
 
+extern void gatts_app_main(void);
+extern void gattc_app_main(void);
+
+void parse_at_cmd(uint8_t *p_data,uint8_t length)
+{
+    printf("start parse string\r\n");
+    if(!strncmp("peri",(char *)p_data,4)){
+        gatts_app_main();
+    }
+    else if(!strncmp("cent",(char *)p_data,4)){
+        gattc_app_main();
+    }
+    else if(!strncmp("conn",(char *)p_data,4)){
+        printf("get conn\r\n");
+    }
+}
+
 static void uart_event_task(void *pvParameters)
 {
     uart_event_t event;
@@ -56,6 +73,7 @@ static void uart_event_task(void *pvParameters)
                     uart_read_bytes(EX_UART_NUM, dtmp, event.size, portMAX_DELAY);
                     ESP_LOGI(TAG, "[DATA EVT]:");
                     uart_write_bytes(EX_UART_NUM, (const char*) dtmp, event.size);
+                    parse_at_cmd(dtmp,event.size);
                     break;
                 //Event of HW FIFO overflow detected
                 case UART_FIFO_OVF:
