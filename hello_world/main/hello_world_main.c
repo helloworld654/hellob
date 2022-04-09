@@ -13,9 +13,12 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
+extern void gatts_app_main(void);
+
 void app_main(void)
 {
     printf("Hello world!\n");
+    gatts_app_main();
 
     while(1)
     {
