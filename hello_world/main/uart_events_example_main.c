@@ -13,6 +13,7 @@
 #include "freertos/queue.h"
 #include "driver/uart.h"
 #include "esp_log.h"
+#include "user_cmd.h"
 
 static const char *TAG = "uart_events";
 
@@ -32,6 +33,11 @@ static const char *TAG = "uart_events";
 #define EX_UART_NUM UART_NUM_0
 #define PATTERN_CHR_NUM    (3)         /*!< Set the number of consecutive and identical characters received by receiver which defines a UART pattern*/
 
+#define CMD_NUM    10
+#define CMD_LENGTH    10
+char *p_cmd[CMD_NUM] = {NULL};
+uint8_t cmd_actual_num = 0;
+
 #define BUF_SIZE (1024)
 #define RD_BUF_SIZE (BUF_SIZE)
 static QueueHandle_t uart0_queue;
@@ -40,7 +46,47 @@ extern void gatts_app_main(void);
 extern void gattc_app_main(void);
 extern void connect_to_peripheral(uint8_t *p_addr);
 
+void start_ble_peripheral(uint8_t argc,char *argv[])
+{
+    gatts_app_main();
+}
+
+void start_ble_central(uint8_t argc,char *argv[])
+{
+    gattc_app_main();
+}
+
+cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central}};
+
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
+{
+    uint8_t i,j,cmd_index;
+    if(length < 2)
+        return ;
+    cmd_index = 0;
+    for(i=0;i<length-1;){
+        if(p_data[i]==' ' || p_data[i]==','){
+            i++;
+            continue;
+        }
+        for(j=i+1;j<length;j++){
+            if(p_data[j]==',' || p_data[j]==' ' || p_data[j]=='\r' || p_data[j]=='\n'){
+                memcpy(p_cmd[cmd_index],p_data+i,j-i);
+                p_cmd[cmd_index++][j-i] = '\0'; 
+                break;
+            }
+        }
+        i = j+1;
+    }
+    for(i=0;i<cmd_actual_num;i++){
+        if(strcmp(p_cmd[0],cms_num_struct[i].cmd_str) == 0){
+            cms_num_struct[i].cmd_func(cmd_index,p_cmd);
+            break;
+        }
+    }
+}
+
+void parse_at_cmd1(uint8_t *p_data,uint8_t length)
 {
     printf("start parse string\r\n");
     if(!strncmp("peri",(char *)p_data,4)){
@@ -49,9 +95,21 @@ void parse_at_cmd(uint8_t *p_data,uint8_t length)
     else if(!strncmp("cent",(char *)p_data,4)){
         gattc_app_main();
     }
-    else if(!strncmp("conn8",(char *)p_data,4)){
-        uint8_t bt_addr[6] = {0x24,0x0a,0xc4,0x61,0xb3,0x9e};
-        connect_to_peripheral(bt_addr);
+    else if(!strncmp("conn8",(char *)p_data,5)){
+        uint8_t bt_addr1[6] = {0x24,0x0a,0xc4,0x61,0xb3,0x9e};
+        printf("connect ot bt addr:");
+        for(uint8_t i=0;i<6;i++)
+            printf("%02x ",bt_addr1[i]);
+        printf("\r\n");
+        connect_to_peripheral(bt_addr1);
+    }
+    else if(!strncmp("conn7",(char *)p_data,5)){
+        uint8_t bt_addr2[6] = {0x58,0xbf,0x25,0x33,0x44,0xe6};
+        printf("connect ot bt addr:");
+        for(uint8_t i=0;i<6;i++)
+            printf("%02x ",bt_addr2[i]);
+        printf("\r\n");
+        connect_to_peripheral(bt_addr2);
     }
 }
 
@@ -137,6 +195,15 @@ static void uart_event_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+void user_cmd_init(void)
+{
+    uint8_t i;
+    cmd_actual_num = sizeof(cms_num_struct)/sizeof(cms_num_struct[0]);
+    for(i=0;i<CMD_NUM;i++){
+        p_cmd[i] = (char *)malloc(sizeof(char)*CMD_LENGTH);
+    }
+}
+
 void uart_evnet_app_main(void)
 {
     esp_log_level_set(TAG, ESP_LOG_INFO);
@@ -164,6 +231,8 @@ void uart_evnet_app_main(void)
     uart_enable_pattern_det_baud_intr(EX_UART_NUM, '+', PATTERN_CHR_NUM, 9, 0, 0);
     //Reset the pattern queue length to record at most 20 pattern positions.
     uart_pattern_queue_reset(EX_UART_NUM, 20);
+
+    user_cmd_init();
 
     //Create a task to handler UART event from ISR
     xTaskCreate(uart_event_task, "uart_event_task", 2048, NULL, 12, NULL);

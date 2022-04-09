@@ -296,10 +296,22 @@ void example_exec_write_event_env(prepare_type_env_t *prepare_write_env, esp_ble
     prepare_write_env->prepare_len = 0;
 }
 
+static void print_bt_addr(void)
+{
+    uint8_t bt_addr[6],addr_type;
+    esp_ble_gap_get_local_used_addr(bt_addr,&addr_type);
+    printf("local bt addr:");
+    for(uint8_t i=0;i<6;i++){
+        printf("%02x ",bt_addr[i]);
+    }
+    printf("\r\n");
+}
+
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
     switch (event) {
     case ESP_GATTS_REG_EVT:
         ESP_LOGI(GATTS_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
+        print_bt_addr();
         gl_profile_tab[PROFILE_A_APP_ID].service_id.is_primary = true;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.inst_id = 0x00;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_16;
