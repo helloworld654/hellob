@@ -13,4 +13,6 @@ typedef struct cmd_struct
 
 uint32_t str_to_num(char *p_str,uint8_t length);
 
+uint8_t str_to_hex(uint8_t *p_data,char *p_str);
+
 #endif

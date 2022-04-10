@@ -71,9 +71,11 @@ void start_ble_central(uint8_t argc,char *argv[])
 void establish_connection(uint8_t argc,char *argv[])
 {
     uint8_t i,bt_addr[6];
-    for(i=0;i<12;i+=2){
-        bt_addr[i/2] = str_to_num(argv[1]+i,2);
+    if(strlen(argv[1]) != 12){
+        printf("[%s] the length of bt addr is wrong!!\r\n",__func__);
+        return ;
     }
+    str_to_hex(bt_addr,argv[1]);
     printf("connect to bt addr:");
     for(i=0;i<6;i++){
         printf("%02x ",bt_addr[i]);
@@ -84,27 +86,23 @@ void establish_connection(uint8_t argc,char *argv[])
 
 void gatt_write_cmd(uint8_t argc,char *argv[])
 {
-    uint8_t i,*p_data = NULL;
-    uint8_t length;
+    uint8_t length,*p_data = NULL;
     length = strlen(argv[1]);
     p_data = (uint8_t *)malloc(sizeof(uint8_t)*(length/2));
-    for(i=0;i<length;i+=2){
-        p_data[i/2] = str_to_num(argv[1]+i,2);
+    if(!str_to_hex(p_data,argv[1])){
+        gattc_write_demo(p_data,length/2);
     }
-    gattc_write_demo(p_data,length/2);
     free(p_data);
 }
 
 void gatt_notify_cmd(uint8_t argc,char *argv[])
 {
-    uint8_t i,*p_data = NULL;
-    uint8_t length;
+    uint8_t length,*p_data = NULL;
     length = strlen(argv[1]);
     p_data = (uint8_t *)malloc(sizeof(uint8_t)*(length/2));
-    for(i=0;i<length;i+=2){
-        p_data[i/2] = str_to_num(argv[1]+i,2);
+    if(!str_to_hex(p_data,argv[1])){
+        gatts_notify_demo(p_data,length/2);
     }
-    gatts_notify_demo(p_data,length/2);
     free(p_data);
 }
 
