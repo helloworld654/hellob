@@ -99,6 +99,11 @@ void parse_at_cmd(uint8_t *p_data,uint8_t length)
                 p_cmd[cmd_index++][j-i] = '\0'; 
                 break;
             }
+            if(j == length-1){
+                memcpy(p_cmd[cmd_index],p_data+i,j-i+1);
+                p_cmd[cmd_index++][j-i+1] = '\0'; 
+                break;
+            }
         }
         i = j+1;
     }
