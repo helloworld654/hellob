@@ -325,12 +325,26 @@ void connect_to_peripheral(uint8_t *p_addr)
     }
 }
 
+void gattc_write_demo(uint8_t *p_data,uint8_t length)
+{
+    esp_ble_gattc_write_char( gl_profile_tab[PROFILE_A_APP_ID].gattc_if,
+                            gl_profile_tab[PROFILE_A_APP_ID].conn_id,
+                            gl_profile_tab[PROFILE_A_APP_ID].char_handle,
+                            length,
+                            p_data,
+                            ESP_GATT_WRITE_TYPE_RSP,
+                            ESP_GATT_AUTH_REQ_NONE);
+}
+
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
     uint8_t *adv_name = NULL;
     uint8_t adv_name_len = 0;
     switch (event) {
     case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT: {
+        // //the unit of the duration is second
+        // uint32_t duration = 30;
+        // esp_ble_gap_start_scanning(duration);
         break;
     }
     case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:

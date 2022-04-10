@@ -34,7 +34,7 @@ static const char *TAG = "uart_events";
 #define PATTERN_CHR_NUM    (3)         /*!< Set the number of consecutive and identical characters received by receiver which defines a UART pattern*/
 
 #define CMD_NUM    10
-#define CMD_LENGTH    10
+#define CMD_LENGTH    20
 char *p_cmd[CMD_NUM] = {NULL};
 uint8_t cmd_actual_num = 0;
 
@@ -45,6 +45,7 @@ static QueueHandle_t uart0_queue;
 extern void gatts_app_main(void);
 extern void gattc_app_main(void);
 extern void connect_to_peripheral(uint8_t *p_addr);
+extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
 
 void print_paras(uint8_t argc,char *argv[])
 {
@@ -80,7 +81,20 @@ void establish_connection(uint8_t argc,char *argv[])
     connect_to_peripheral(bt_addr);
 }
 
-cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection}};
+void gatt_write_cmd(uint8_t argc,char *argv[])
+{
+    uint8_t i,*p_data = NULL;
+    uint8_t length;
+    length = strlen(argv[1]);
+    p_data = (uint8_t *)malloc(sizeof(uint8_t)*(length/2));
+    for(i=0;i<length;i+=2){
+        p_data[i/2] = str_to_num(argv[1]+i,2);
+    }
+    gattc_write_demo(p_data,length/2);
+    free(p_data);
+}
+
+cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection},{"atw",gatt_write_cmd}};
 
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
 {
