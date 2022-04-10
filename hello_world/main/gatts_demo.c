@@ -307,6 +307,12 @@ static void print_bt_addr(void)
     printf("\r\n");
 }
 
+void gatts_notify_demo(uint8_t *p_data,uint8_t length)
+{
+    esp_ble_gatts_send_indicate(gl_profile_tab[PROFILE_A_APP_ID].gatts_if, gl_profile_tab[PROFILE_A_APP_ID].conn_id, gl_profile_tab[PROFILE_A_APP_ID].char_handle,
+                                                length, p_data, false);
+}
+
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
     switch (event) {
     case ESP_GATTS_REG_EVT:

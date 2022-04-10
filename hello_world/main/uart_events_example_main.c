@@ -46,6 +46,7 @@ extern void gatts_app_main(void);
 extern void gattc_app_main(void);
 extern void connect_to_peripheral(uint8_t *p_addr);
 extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
+extern void gatts_notify_demo(uint8_t *p_data,uint8_t length);
 
 void print_paras(uint8_t argc,char *argv[])
 {
@@ -94,7 +95,20 @@ void gatt_write_cmd(uint8_t argc,char *argv[])
     free(p_data);
 }
 
-cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection},{"atw",gatt_write_cmd}};
+void gatt_notify_cmd(uint8_t argc,char *argv[])
+{
+    uint8_t i,*p_data = NULL;
+    uint8_t length;
+    length = strlen(argv[1]);
+    p_data = (uint8_t *)malloc(sizeof(uint8_t)*(length/2));
+    for(i=0;i<length;i+=2){
+        p_data[i/2] = str_to_num(argv[1]+i,2);
+    }
+    gatts_notify_demo(p_data,length/2);
+    free(p_data);
+}
+
+cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection},{"atw",gatt_write_cmd},{"atno",gatt_notify_cmd}};
 
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
 {
