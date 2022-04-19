@@ -14,6 +14,7 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "user_cmd.h"
+#include "esp_gap_ble_api.h"
 
 static const char *TAG = "uart_events";
 
@@ -106,7 +107,24 @@ void gatt_notify_cmd(uint8_t argc,char *argv[])
     free(p_data);
 }
 
-cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection},{"atw",gatt_write_cmd},{"atno",gatt_notify_cmd}};
+void cent_start_ble_scan(uint8_t argc,char *argv[])
+{
+    if(argc == 1){
+        esp_ble_gap_start_scanning(0xffffffff);
+    }
+    else if(argc == 2){
+        uint32_t scan_time = 100;
+        esp_ble_gap_start_scanning(scan_time);
+    }
+}
+
+void cent_stop_ble_scan(uint8_t argc,char *argv[])
+{
+    esp_ble_gap_stop_scanning();
+}
+
+cmd_struct cms_num_struct[] = {{"peri",start_ble_peripheral},{"cent",start_ble_central},{"conn",establish_connection},{"atw",gatt_write_cmd},{"atno",gatt_notify_cmd},
+    {"scan1",cent_start_ble_scan},{"scan0",cent_stop_ble_scan}};
 
 void parse_at_cmd(uint8_t *p_data,uint8_t length)
 {
