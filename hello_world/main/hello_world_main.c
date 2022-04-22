@@ -14,15 +14,16 @@
 #include "esp_spi_flash.h"
 
 extern void uart_evnet_app_main(void);
+extern void pwm_app_main(void);
 
 void app_main(void)
 {
-    printf("Hello world!\n");
     uart_evnet_app_main();
+    pwm_app_main();
 
+    printf("Hello world!\n");
     while(1)
     {
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
-
 }
