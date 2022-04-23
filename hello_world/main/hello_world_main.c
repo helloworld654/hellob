@@ -15,11 +15,12 @@
 
 extern void uart_evnet_app_main(void);
 extern void pwm_app_main(void);
+extern void i2c_app_main(void);
 
 void app_main(void)
 {
     uart_evnet_app_main();
-    pwm_app_main();
+    i2c_app_main();
 
     printf("Hello world!\n");
     while(1)
