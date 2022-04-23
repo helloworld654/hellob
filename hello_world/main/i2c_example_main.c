@@ -18,6 +18,8 @@
 
 static const char *TAG = "i2c-example";
 
+#define USE_MPU6050    1
+
 #define DATA_LENGTH 512                  /*!< Data buffer length of test buffer */
 #define RW_TEST_LENGTH 10               /*!< Data length for r/w test, [0,DATA_LENGTH] */
 #define DELAY_TIME_BETWEEN_ITEMS_MS 1000 /*!< delay time between different test items */
@@ -35,8 +37,8 @@ static const char *TAG = "i2c-example";
 #define I2C_MASTER_TX_BUF_DISABLE 0                           /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE 0                           /*!< I2C master doesn't need buffer */
 
-#define BH1750_SENSOR_ADDR 0x23   /*!< slave address for BH1750 sensor */
-#define BH1750_CMD_START 0x23   /*!< Operation mode */
+#define MPU6050_SENSOR_ADDR 0x68   /*!< slave address for BH1750 sensor */
+#define MPU6050_CMD_START 0x3e   /*!< Operation mode */
 #define ESP_SLAVE_ADDR 0x28 /*!< ESP32 slave address, you can set any 7bit value */    // get it from default idf sdk
 #define WRITE_BIT I2C_MASTER_WRITE              /*!< I2C master write */
 #define READ_BIT I2C_MASTER_READ                /*!< I2C master read */
@@ -117,18 +119,22 @@ static esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t *data_h, uin
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, BH1750_CMD_START, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, MPU6050_CMD_START, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret != ESP_OK) {
-        return ret;
+        return 0;
+        // return ret;
+    }
+    else{
+        return 1;
     }
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, BH1750_SENSOR_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
     i2c_master_read_byte(cmd, data_h, ACK_VAL);
     i2c_master_read_byte(cmd, data_l, NACK_VAL);
     i2c_master_stop(cmd);
@@ -198,6 +204,17 @@ static void disp_buf(uint8_t *buf, int len)
 }
 #endif //!CONFIG_IDF_TARGET_ESP32C3
 
+static void mpu6050_init(void)
+{
+    // ret = i2c_master_write_slave(I2C_MASTER_NUM, data_wr, RW_TEST_LENGTH);
+    if (i2c_master_sensor_test(I2C_MASTER_NUM,NULL,0)) {
+        printf("mpu 6050 write success\n");
+    }
+    else{
+        printf("mpu write failed\n");
+    }
+}
+
 static void i2c_test_task(void *arg)
 {
     int ret;
@@ -211,8 +228,15 @@ static void i2c_test_task(void *arg)
     uint8_t sensor_data_h, sensor_data_l;
     int cnt = 0;
     while (1) {
+#if defined(USE_MPU6050) && USE_MPU6050
+#else
         ESP_LOGI(TAG, "TASK[%d] test cnt: %d", task_idx, cnt++);
+#endif
 #if !CONFIG_IDF_TARGET_ESP32C3
+#if defined(USE_MPU6050) && USE_MPU6050
+        mpu6050_init();
+        vTaskDelay(2000/portTICK_RATE_MS);
+#else
         // slave write data --> master read data
         for (i = 0; i < DATA_LENGTH; i++) {
             data[i] = i;
@@ -272,6 +296,7 @@ static void i2c_test_task(void *arg)
         }
         xSemaphoreGive(print_mux);
         vTaskDelay((DELAY_TIME_BETWEEN_ITEMS_MS * (task_idx + 1)) / portTICK_RATE_MS);
+#endif
 #endif //!CONFIG_IDF_TARGET_ESP32C3
     }
     vSemaphoreDelete(print_mux);
@@ -287,5 +312,8 @@ void i2c_app_main(void)
 #endif
     ESP_ERROR_CHECK(i2c_master_init());
     xTaskCreate(i2c_test_task, "i2c_test_task_0", 1024 * 2, (void *)0, 10, NULL);
+#if defined(USE_MPU6050) && USE_MPU6050
+#else
     xTaskCreate(i2c_test_task, "i2c_test_task_1", 1024 * 2, (void *)1, 10, NULL);
+#endif
 }
