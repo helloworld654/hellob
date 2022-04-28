@@ -20,6 +20,21 @@ static const char *TAG = "i2c-example";
 
 #define USE_MPU6050    1
 
+#define WHO	    0x00
+#define	SMPL	0x15
+#define DLPF	0x16
+#define INT_C	0x17
+#define INT_S	0x1A
+#define	TMP_H	0x1B
+#define	TMP_L	0x1C
+#define	GX_H	0x1D
+#define	GX_L	0x1E
+#define	GY_H	0x1F
+#define	GY_L	0x20
+#define GZ_H	0x21
+#define GZ_L	0x22
+#define PWR_M	0x3E
+
 #define DATA_LENGTH 512                  /*!< Data buffer length of test buffer */
 #define RW_TEST_LENGTH 10               /*!< Data length for r/w test, [0,DATA_LENGTH] */
 #define DELAY_TIME_BETWEEN_ITEMS_MS 1000 /*!< delay time between different test items */
@@ -114,23 +129,24 @@ static esp_err_t __attribute__((unused)) i2c_master_write_slave(i2c_port_t i2c_n
  * | start | slave_addr + rd_bit + ack | read 1 byte + ack  | read 1 byte + nack | stop |
  * --------|---------------------------|--------------------|--------------------|------|
  */
-static esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t *data_h, uint8_t *data_l)
+static esp_err_t i2c_master_sensor_write_reg(i2c_port_t i2c_num, uint8_t reg_addr, uint8_t reg_data)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
     i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
-    i2c_master_write_byte(cmd, MPU6050_CMD_START, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg_data, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret != ESP_OK) {
         return 0;
-        // return ret;
     }
     else{
         return 1;
     }
+#if 0
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
@@ -141,6 +157,7 @@ static esp_err_t i2c_master_sensor_test(i2c_port_t i2c_num, uint8_t *data_h, uin
     ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
+#endif
 }
 
 /**
@@ -204,14 +221,19 @@ static void disp_buf(uint8_t *buf, int len)
 }
 #endif //!CONFIG_IDF_TARGET_ESP32C3
 
-static void mpu6050_init(void)
+static uint8_t mpu6050_init(void)
 {
-    // ret = i2c_master_write_slave(I2C_MASTER_NUM, data_wr, RW_TEST_LENGTH);
-    if (i2c_master_sensor_test(I2C_MASTER_NUM,NULL,0)) {
-        printf("mpu 6050 write success\n");
+    if(i2c_master_sensor_write_reg(I2C_MASTER_NUM,PWR_M,0x80)) {
+        i2c_master_sensor_write_reg(I2C_MASTER_NUM,SMPL,0x07);
+        i2c_master_sensor_write_reg(I2C_MASTER_NUM,DLPF,0x1E);    //±2000°
+        i2c_master_sensor_write_reg(I2C_MASTER_NUM,INT_C,0x00);
+        i2c_master_sensor_write_reg(I2C_MASTER_NUM,PWR_M,0x00);
+        printf("mpu 6050 init success\n");
+        return 1;
     }
     else{
         printf("mpu write failed\n");
+        return 0;
     }
 }
 
