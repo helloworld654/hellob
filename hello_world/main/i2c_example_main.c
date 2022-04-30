@@ -230,15 +230,8 @@ static void i2c_test_task(void *arg)
     uint8_t sensor_data_h, sensor_data_l;
     int cnt = 0;
     while (1) {
-#if defined(USE_MPU6050) && USE_MPU6050
-#else
         ESP_LOGI(TAG, "TASK[%d] test cnt: %d", task_idx, cnt++);
-#endif
 #if !CONFIG_IDF_TARGET_ESP32C3
-#if defined(USE_MPU6050) && USE_MPU6050
-        mpu6050_init();
-        vTaskDelay(2000/portTICK_RATE_MS);
-#else
         // slave write data --> master read data
         for (i = 0; i < DATA_LENGTH; i++) {
             data[i] = i;
@@ -298,7 +291,6 @@ static void i2c_test_task(void *arg)
         }
         xSemaphoreGive(print_mux);
         vTaskDelay((DELAY_TIME_BETWEEN_ITEMS_MS * (task_idx + 1)) / portTICK_RATE_MS);
-#endif
 #endif //!CONFIG_IDF_TARGET_ESP32C3
     }
     vSemaphoreDelete(print_mux);
