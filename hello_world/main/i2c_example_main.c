@@ -305,17 +305,28 @@ static void i2c_test_task(void *arg)
     vTaskDelete(NULL);
 }
 
+static void i2c_mpu6050_task(void *arg)
+{
+    while(1){
+        mpu6050_init();
+        vTaskDelay(2000/portTICK_RATE_MS);
+    }
+    vTaskDelete(NULL);
+}
+
 // i2c master and slave use the this same image
 void i2c_app_main(void)
 {
+#if defined(USE_MPU6050) && USE_MPU6050
+    ESP_ERROR_CHECK(i2c_master_init());
+    xTaskCreate(i2c_mpu6050_task, "i2c_mpu6050_task", 1024 * 2, (void *)2, 10, NULL);
+#else
     print_mux = xSemaphoreCreateMutex();
 #if !CONFIG_IDF_TARGET_ESP32C3
     ESP_ERROR_CHECK(i2c_slave_init());
 #endif
     ESP_ERROR_CHECK(i2c_master_init());
     xTaskCreate(i2c_test_task, "i2c_test_task_0", 1024 * 2, (void *)0, 10, NULL);
-#if defined(USE_MPU6050) && USE_MPU6050
-#else
     xTaskCreate(i2c_test_task, "i2c_test_task_1", 1024 * 2, (void *)1, 10, NULL);
 #endif
 }
