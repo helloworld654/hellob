@@ -78,6 +78,41 @@ static esp_err_t __attribute__((unused)) i2c_master_read_slave(i2c_port_t i2c_nu
     return ret;
 }
 
+//  return 0: success    other: fail
+uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
+{
+    if (size == 0) {
+        return 3;
+    }
+
+    int ret;
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    if (ret != ESP_OK) {
+        return 1;
+    }
+
+    cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, (MPU6050_SENSOR_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    if (size > 1) {
+        i2c_master_read(cmd, data_rd, size - 1, ACK_VAL);
+    }
+    i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL);
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    if(ret == ESP_OK)
+        return 0;
+    else
+        return 2;
+}
+
 /**
  * @brief Test code to write esp-i2c-slave
  *        Master device write data to slave(both esp32),
@@ -299,8 +334,9 @@ static void i2c_test_task(void *arg)
 
 static void i2c_mpu6050_task(void *arg)
 {
+    mpu6050_init();
     while(1){
-        mpu6050_init();
+        mpu6050_read_test();
         vTaskDelay(2000/portTICK_RATE_MS);
     }
     vTaskDelete(NULL);

@@ -3,4 +3,6 @@
 
 uint8_t mpu6050_init(void);
 
+void mpu6050_read_test(void);
+
 #endif

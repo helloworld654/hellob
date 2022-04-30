@@ -44,3 +44,12 @@ uint8_t mpu6050_init(void)
         return 1;
     }
 }
+
+void mpu6050_read_test(void)
+{
+    uint8_t data_read;
+    i2c_read_sensor_reg(GYRO_CONFIG,&data_read,1);
+    printf("the value of GYRO_CONFIG:0x%x\r\n",data_read);
+    i2c_read_sensor_reg(SMPLRT_DIV,&data_read,1);
+    printf("the value of SMPLRT_DIV:0x%x\r\n",data_read);
+}
