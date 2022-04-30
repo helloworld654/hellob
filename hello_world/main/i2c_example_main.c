@@ -38,8 +38,6 @@ static const char *TAG = "i2c-example";
 #define I2C_MASTER_TX_BUF_DISABLE 0                           /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE 0                           /*!< I2C master doesn't need buffer */
 
-#define MPU6050_SENSOR_ADDR 0x68   /*!< slave address for BH1750 sensor */
-#define MPU6050_CMD_START 0x3e   /*!< Operation mode */
 #define ESP_SLAVE_ADDR 0x28 /*!< ESP32 slave address, you can set any 7bit value */    // get it from default idf sdk
 #define WRITE_BIT I2C_MASTER_WRITE              /*!< I2C master write */
 #define READ_BIT I2C_MASTER_READ                /*!< I2C master read */
