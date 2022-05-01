@@ -29,7 +29,7 @@ uint8_t mpu6050_init(void)
     }
 }
 
-static uint16_t read_16bytes_from_reg(uint8_t reg_addr)
+static uint16_t read_16bits_from_reg(uint8_t reg_addr)
 {
 	uint16_t read_value = 0;
 	uint8_t read_byte;
@@ -46,7 +46,6 @@ static uint16_t read_16bytes_from_reg(uint8_t reg_addr)
 float calcu_actual_accl(uint16_t reg_val)
 {
 	float result;
-	// result = (reg_val-ACCL_MIDDLE)/(ACCL_EVERY_G*1.0);
 	if(reg_val < ACCL_MIDDLE){
 		result = reg_val/(ACCL_EVERY_G*1.0);
 	}
@@ -60,9 +59,9 @@ void mpu6050_read_accl(void)
 {
 	uint16_t x,y,z;
 	float accl_x,accl_y,accl_z;
-	x = read_16bytes_from_reg(ACCEL_XOUT_H);
-	y = read_16bytes_from_reg(ACCEL_YOUT_H);
-	z = read_16bytes_from_reg(ACCEL_ZOUT_H);
+	x = read_16bits_from_reg(ACCEL_XOUT_H);
+	y = read_16bits_from_reg(ACCEL_YOUT_H);
+	z = read_16bits_from_reg(ACCEL_ZOUT_H);
 	printf("x:%u,  y:%u,  z:%u    ",x,y,z);
 	accl_x = calcu_actual_accl(x);
 	accl_y = calcu_actual_accl(y);
