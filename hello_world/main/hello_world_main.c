@@ -24,7 +24,7 @@ void app_main(void)
 {
     gpio_reset_pin(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
-    uart_evnet_app_main();
+    // uart_evnet_app_main();    //  used for at cmd
 
     i2c_app_main();
 

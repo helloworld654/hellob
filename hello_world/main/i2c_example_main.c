@@ -334,8 +334,8 @@ static void i2c_mpu6050_task(void *arg)
 {
     mpu6050_init();
     while(1){
-        mpu6050_read_test();
-        vTaskDelay(2000/portTICK_RATE_MS);
+        mpu6050_read_accl();
+        vTaskDelay(200/portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
 }
