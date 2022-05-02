@@ -13,9 +13,12 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "driver/gpio.h"
+#include "hello_world_main.h"
 
 #define BLINK_GPIO    2
 
+extern void gattc_app_main(void);
+extern void gatts_app_main(void);
 extern void uart_evnet_app_main(void);
 extern void pwm_app_main(void);
 extern void i2c_app_main(void);
@@ -24,6 +27,14 @@ void app_main(void)
 {
     gpio_reset_pin(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+
+#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
+    gattc_app_main();
+#endif
+
+#if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
+    gatts_app_main();
+#endif
 
     printf("Hello world!\n");
     while(1)
