@@ -70,3 +70,20 @@ void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val)
 	// printf("x:%u,  y:%u,  z:%u    ",x,y,z);
 	// printf("accl_x:%.3f,  accl_y:%.3f,  accl_z:%.3f\r\n",accl_x,accl_y,accl_z);
 }
+
+extern uint8_t ble_client_is_connect(void);
+extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
+void i2c_mpu6050_task(void *arg)
+{
+    MPU_ACCL_VAL accl_val;
+    mpu6050_init();
+    while(1){
+        if(ble_client_is_connect()){
+            // gattc_write_demo(data,10);
+            mpu6050_read_accl(&accl_val);
+            printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
+        }
+        vTaskDelay(500/portTICK_RATE_MS);
+    }
+    vTaskDelete(NULL);
+}
