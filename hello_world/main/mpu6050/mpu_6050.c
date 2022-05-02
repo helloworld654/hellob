@@ -109,11 +109,11 @@ void i2c_mpu6050_task(void *arg)
     mpu6050_init();
     while(1){
         if(ble_client_is_connect()){
-            // gattc_write_demo(data,10);
             mpu6050_read_accl(&accl_val);
             printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
 			calcu_move_by_accl(&accl_val,&car_move);
 			printf("car forward:%d,   left:%d\r\n",car_move.to_forward,car_move.to_left);
+            gattc_write_demo(&car_move,sizeof(car_move));
         }
         vTaskDelay(500/portTICK_RATE_MS);
     }

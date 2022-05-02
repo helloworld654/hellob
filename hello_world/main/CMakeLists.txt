@@ -6,5 +6,8 @@ idf_component_register(SRCS "hello_world_main.c"
                         "mcpwm_brushed_dc_control_example.c"
                         "i2c_example_main.c"
                         "mpu6050/mpu_6050.c"
+                        "motor_control/dc_motor.c"
                     INCLUDE_DIRS "."
-                    "mpu6050/")
+                    "mpu6050/"
+                    "motor_control/"
+                    )

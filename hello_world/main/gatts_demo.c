@@ -32,6 +32,7 @@
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
 #include "esp_gatt_common_api.h"
+#include "hello_world_main.h"
 
 #include "sdkconfig.h"
 
@@ -313,6 +314,7 @@ void gatts_notify_demo(uint8_t *p_data,uint8_t length)
                                                 length, p_data, false);
 }
 
+extern void get_car_move_direction(uint8_t *p_data,uint8_t len);
 static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) {
     switch (event) {
     case ESP_GATTS_REG_EVT:
@@ -374,6 +376,9 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         if (!param->write.is_prep){
             ESP_LOGI(GATTS_TAG, "GATT_WRITE_EVT, value len %d, value :", param->write.len);
             esp_log_buffer_hex(GATTS_TAG, param->write.value, param->write.len);
+#if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
+            get_car_move_direction(param->write.value,param->write.len);
+#endif
             if (gl_profile_tab[PROFILE_A_APP_ID].descr_handle == param->write.handle && param->write.len == 2){
                 uint16_t descr_value = param->write.value[1]<<8 | param->write.value[0];
                 if (descr_value == 0x0001){
