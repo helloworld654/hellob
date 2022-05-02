@@ -281,6 +281,8 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
             break;
         }
         ESP_LOGI(GATTC_TAG, "write descr success ");
+#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
+#else
         uint8_t write_char_data[35];
         for (int i = 0; i < sizeof(write_char_data); ++i)
         {
@@ -293,6 +295,7 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
                                   write_char_data,
                                   ESP_GATT_WRITE_TYPE_RSP,
                                   ESP_GATT_AUTH_REQ_NONE);
+#endif
         break;
     case ESP_GATTC_SRVC_CHG_EVT: {
         esp_bd_addr_t bda;

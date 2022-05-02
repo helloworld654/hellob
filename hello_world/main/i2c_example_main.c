@@ -16,6 +16,8 @@
 #include "driver/i2c.h"
 #include "sdkconfig.h"
 #include "mpu_6050.h"
+#include "hello_world_main.h"
+#include "freertos/timers.h"
 
 static const char *TAG = "i2c-example";
 
@@ -330,6 +332,16 @@ static void i2c_test_task(void *arg)
     vTaskDelete(NULL);
 }
 
+#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
+void *p_timer_handle = NULL;
+void accl_timer_callback(void *p_text)
+{
+    (void)p_text;
+    printf("[%s] accl test timeout\r\n",__func__);
+    xTimerChangePeriod(p_timer_handle,2000/portTICK_RATE_MS,0);
+}
+#endif
+
 static void i2c_mpu6050_task(void *arg)
 {
     mpu6050_init();
@@ -344,6 +356,11 @@ static void i2c_mpu6050_task(void *arg)
 void i2c_app_main(void)
 {
 #if defined(USE_MPU6050) && USE_MPU6050
+#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
+    uint8_t timer_id = 2;
+    p_timer_handle = xTimerCreate("send_accl_timer",2000/portTICK_RATE_MS,0,&timer_id,accl_timer_callback);
+    xTimerChangePeriod(p_timer_handle,2000/portTICK_RATE_MS,0);
+#endif
     ESP_ERROR_CHECK(i2c_master_init());
     xTaskCreate(i2c_mpu6050_task, "i2c_mpu6050_task", 1024 * 2, (void *)2, 10, NULL);
 #else

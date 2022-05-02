@@ -30,6 +30,7 @@ void app_main(void)
 
 #if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
     gattc_app_main();
+    i2c_app_main();
 #endif
 
 #if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
