@@ -1,6 +1,8 @@
 #ifndef __MPU_6050_H__
 #define __MPU_6050_H__
 
+#include "i2c_example_main.h"
+
 #define MPU6050_SENSOR_ADDR 0x68   /*!< slave address for MPU6050 sensor */
 
 //****************************************
@@ -30,6 +32,6 @@
 
 uint8_t mpu6050_init(void);
 
-void mpu6050_read_accl(void);
+void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val);
 
 #endif

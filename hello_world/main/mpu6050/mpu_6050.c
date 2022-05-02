@@ -3,7 +3,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "mpu_6050.h"
-#include "i2c_example_main.h"
 
 //  accl calcu for +/- 2g range
 #define ACCL_MAX    (65536)
@@ -55,16 +54,19 @@ float calcu_actual_accl(uint16_t reg_val)
 	return result;
 }
 
-void mpu6050_read_accl(void)
+void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val)
 {
 	uint16_t x,y,z;
 	float accl_x,accl_y,accl_z;
 	x = read_16bits_from_reg(ACCEL_XOUT_H);
 	y = read_16bits_from_reg(ACCEL_YOUT_H);
 	z = read_16bits_from_reg(ACCEL_ZOUT_H);
-	printf("x:%u,  y:%u,  z:%u    ",x,y,z);
 	accl_x = calcu_actual_accl(x);
 	accl_y = calcu_actual_accl(y);
 	accl_z = calcu_actual_accl(z);
-	printf("accl_x:%.3f,  accl_y:%.3f,  accl_z:%.3f\r\n",accl_x,accl_y,accl_z);
+	p_accl_val->x = accl_x;
+	p_accl_val->y = accl_y;
+	p_accl_val->z = accl_z;
+	// printf("x:%u,  y:%u,  z:%u    ",x,y,z);
+	// printf("accl_x:%.3f,  accl_y:%.3f,  accl_z:%.3f\r\n",accl_x,accl_y,accl_z);
 }

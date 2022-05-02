@@ -336,18 +336,15 @@ extern uint8_t ble_client_is_connect(void);
 extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
 static void i2c_mpu6050_task(void *arg)
 {
-    uint8_t data[10],i;
-    for(i=0;i<10;i++){
-        data[i] = i*3;
-    }
+    MPU_ACCL_VAL accl_val;
     mpu6050_init();
     while(1){
         if(ble_client_is_connect()){
-            printf("[%s] bt connected\r\n",__func__);
-            gattc_write_demo(data,10);
+            // gattc_write_demo(data,10);
+            mpu6050_read_accl(&accl_val);
+            printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
         }
-        mpu6050_read_accl();
-        vTaskDelay(1500/portTICK_RATE_MS);
+        vTaskDelay(500/portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
 }
