@@ -9,6 +9,9 @@
 #define ACCL_MIDDLE    (32768)
 #define ACCL_EVERY_G    (16384)
 
+#define ACCL_LEFT_MAX    (0.4)
+#define ACCL_FORWARD_MAX    (0.4)
+
 // return 0:success  other:fail
 uint8_t mpu6050_init(void)
 {
@@ -71,17 +74,46 @@ void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val)
 	// printf("accl_x:%.3f,  accl_y:%.3f,  accl_z:%.3f\r\n",accl_x,accl_y,accl_z);
 }
 
+void calcu_move_by_accl(MPU_ACCL_VAL *p_accl_val,CAR_TO_MOVE *p_car_move)
+{
+	if(p_accl_val==NULL || p_car_move==NULL)
+		return ;
+
+	if(p_accl_val->x > ACCL_LEFT_MAX){
+		p_car_move->to_left = 1;
+	}
+	else if(p_accl_val->x < (-ACCL_LEFT_MAX)){
+		p_car_move->to_left = 2;
+	}
+	else{
+		p_car_move->to_left = 0;
+	}
+	
+	if(p_accl_val->y < (-ACCL_FORWARD_MAX)){
+		p_car_move->to_forward = 1;
+	}
+	else if(p_accl_val->y > ACCL_FORWARD_MAX){
+		p_car_move->to_forward = 2;
+	}
+	else{
+		p_car_move->to_forward = 0;
+	}
+}
+
 extern uint8_t ble_client_is_connect(void);
 extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
 void i2c_mpu6050_task(void *arg)
 {
     MPU_ACCL_VAL accl_val;
+	CAR_TO_MOVE car_move;
     mpu6050_init();
     while(1){
         if(ble_client_is_connect()){
             // gattc_write_demo(data,10);
             mpu6050_read_accl(&accl_val);
             printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
+			calcu_move_by_accl(&accl_val,&car_move);
+			printf("car forward:%d,   left:%d\r\n",car_move.to_forward,car_move.to_left);
         }
         vTaskDelay(500/portTICK_RATE_MS);
     }
