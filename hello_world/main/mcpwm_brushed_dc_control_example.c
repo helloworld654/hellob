@@ -21,6 +21,7 @@
 
 #include "driver/mcpwm.h"
 #include "soc/mcpwm_periph.h"
+#include "hello_world_main.h"
 
 #define GPIO_PWM0A_OUT 19   //Set GPIO 19 as PWM0A
 #define GPIO_PWM0B_OUT 18   //Set GPIO 18 as PWM0B
@@ -88,6 +89,31 @@ void pwm_example_config(void)
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &pwm_config);    //Configure PWM1A & PWM1B with above settings
 }
 
+void set_car_move(uint8_t forward,uint8_t left)
+{
+    uint8_t car_speed = 50;
+    if(forward==1 && left==0){
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, car_speed);    //the left motor
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);    //the right motor
+    }
+    else if(forward==2 && left==0){
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0, car_speed);
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);
+    }
+    else if(forward==0 && left==1){
+        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);
+    }
+    else if(forward==0 && left==2){
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed);
+        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    }
+    else{
+        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
+        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    }
+}
+
 /**
  * @brief Configure MCPWM module for brushed dc motor
  */
@@ -97,6 +123,8 @@ static void mcpwm_example_brushed_motor_control(void *arg)
     mcpwm_example_gpio_initialize();
     pwm_example_config();
     while (1) {
+#if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
+#else
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, 50.0);
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, 60.0);
         vTaskDelay(1000 / portTICK_RATE_MS);
@@ -105,6 +133,8 @@ static void mcpwm_example_brushed_motor_control(void *arg)
         vTaskDelay(1000 / portTICK_RATE_MS);
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+        vTaskDelay(2000 / portTICK_RATE_MS);
+#endif
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }

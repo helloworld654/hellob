@@ -79,20 +79,20 @@ void calcu_move_by_accl(MPU_ACCL_VAL *p_accl_val,CAR_TO_MOVE *p_car_move)
 	if(p_accl_val==NULL || p_car_move==NULL)
 		return ;
 
-	if(p_accl_val->x > ACCL_LEFT_MAX){
-		p_car_move->to_left = 1;
-	}
-	else if(p_accl_val->x < (-ACCL_LEFT_MAX)){
+	if(p_accl_val->y > ACCL_LEFT_MAX){
 		p_car_move->to_left = 2;
+	}
+	else if(p_accl_val->y < (-ACCL_LEFT_MAX)){
+		p_car_move->to_left = 1;
 	}
 	else{
 		p_car_move->to_left = 0;
 	}
 	
-	if(p_accl_val->y < (-ACCL_FORWARD_MAX)){
+	if(p_accl_val->x < (-ACCL_FORWARD_MAX)){
 		p_car_move->to_forward = 1;
 	}
-	else if(p_accl_val->y > ACCL_FORWARD_MAX){
+	else if(p_accl_val->x > ACCL_FORWARD_MAX){
 		p_car_move->to_forward = 2;
 	}
 	else{
