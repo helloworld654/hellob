@@ -1,7 +1,7 @@
 #ifndef __HELLO_WORLD_MAIN_H__
 #define __HELLO_WORLD_MAIN_H__
 
-#define BLE_CAR_CLIENT    1
+#define BLE_CAR_CLIENT    0
 
 #define BLE_CAR_SERVER    0
 

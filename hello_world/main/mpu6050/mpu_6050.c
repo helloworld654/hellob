@@ -115,7 +115,7 @@ void i2c_mpu6050_task(void *arg)
 			printf("car forward:%d,   left:%d\r\n",car_move.to_forward,car_move.to_left);
             gattc_write_demo(&car_move,sizeof(car_move));
         }
-        vTaskDelay(500/portTICK_RATE_MS);
+        vTaskDelay(50/portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
 }
