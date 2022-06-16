@@ -41,9 +41,7 @@
 #define PROFILE_A_APP_ID 0
 #define INVALID_HANDLE   0
 
-#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
 static const char remote_device_name[] = "ESP_GATTS_DEMO";
-#endif
 static bool connect    = false;
 static bool get_server = false;
 static esp_gattc_char_elem_t *char_elem_result   = NULL;
@@ -281,8 +279,6 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
             break;
         }
         ESP_LOGI(GATTC_TAG, "write descr success ");
-#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
-#else
         uint8_t write_char_data[35];
         for (int i = 0; i < sizeof(write_char_data); ++i)
         {
@@ -295,7 +291,6 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
                                   write_char_data,
                                   ESP_GATT_WRITE_TYPE_RSP,
                                   ESP_GATT_AUTH_REQ_NONE);
-#endif
         break;
     case ESP_GATTC_SRVC_CHG_EVT: {
         esp_bd_addr_t bda;
@@ -349,11 +344,9 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
     uint8_t adv_name_len = 0;
     switch (event) {
     case ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT: {
-#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
         //the unit of the duration is second
         uint32_t duration = 30;
         esp_ble_gap_start_scanning(duration);
-#endif
         break;
     }
     case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
@@ -387,7 +380,6 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             }
 #endif
             ESP_LOGI(GATTC_TAG, "\n");
-#if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
             if (adv_name != NULL) {
                 if (strlen(remote_device_name) == adv_name_len && strncmp((char *)adv_name, remote_device_name, adv_name_len) == 0) {
                     ESP_LOGI(GATTC_TAG, "searched device %s\n", remote_device_name);
@@ -399,7 +391,6 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
                     }
                 }
             }
-#endif
 
             break;
         case ESP_GAP_SEARCH_INQ_CMPL_EVT:
