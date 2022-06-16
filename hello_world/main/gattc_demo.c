@@ -46,6 +46,7 @@ static bool connect    = false;
 static bool get_server = false;
 static esp_gattc_char_elem_t *char_elem_result   = NULL;
 static esp_gattc_descr_elem_t *descr_elem_result = NULL;
+extern uint8_t led_mode;
 
 /* Declare static functions */
 static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
@@ -126,6 +127,7 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
             break;
         }
         ESP_LOGI(GATTC_TAG, "open success");
+        led_mode = 2;
         break;
     case ESP_GATTC_DIS_SRVC_CMPL_EVT:
         if (param->dis_srvc_cmpl.status != ESP_GATT_OK){
@@ -347,6 +349,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         //the unit of the duration is second
         uint32_t duration = 30;
         esp_ble_gap_start_scanning(duration);
+        led_mode = 1;
         break;
     }
     case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:

@@ -22,11 +22,15 @@ extern void gatts_app_main(void);
 extern void uart_evnet_app_main(void);
 extern void pwm_app_main(void);
 extern void i2c_app_main(void);
+uint8_t led_mode;
 
 void app_main(void)
 {
     gpio_reset_pin(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    gpio_set_level(BLINK_GPIO, 0);  // set led off
+    uint32_t led_interval = 0;
+    led_mode = 0;
 
 #if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
     gattc_app_main();
@@ -41,12 +45,29 @@ void app_main(void)
     printf("Hello world!\n");
     while(1)
     {
-        /* Blink off (output low) */
-        gpio_set_level(BLINK_GPIO, 0);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
-
-        /* Blink on (output high) */
-        gpio_set_level(BLINK_GPIO, 1);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+        switch(led_mode){
+            case 0:
+                led_interval = 80;
+                break;
+            case 1:
+                led_interval = 200;
+                break;
+            case 2:
+                led_interval = 5000;
+                break;
+            case 3:
+                led_interval = 80;
+                break;
+            default:
+                break;
+        }
+        if(led_interval < 2000){
+            gpio_set_level(BLINK_GPIO, 0);
+            vTaskDelay(led_interval/portTICK_PERIOD_MS);
+        }
+        if(led_interval > 100){
+            gpio_set_level(BLINK_GPIO, 1);
+            vTaskDelay(led_interval/portTICK_PERIOD_MS);
+        }
     }
 }
