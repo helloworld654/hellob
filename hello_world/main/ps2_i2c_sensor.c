@@ -1,21 +1,31 @@
 #include "stdio.h"
 #include "stdint.h"
+#include "string.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "ps2_i2c_sensor.h"
 
 extern uint8_t ble_client_is_connect(void);
 extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
 
-#define LEN    20
+void send_ps2_data_test(void)
+{
+    ps2_button_data ps2_data;
+    memset(&ps2_data,0,sizeof(ps2_button_data));
+    ps2_data.X_DATA = 123;
+    ps2_data.Y_DATA = 224;
+    ps2_data.Z = PS2_BUTTON_NORMAL;
+    ps2_data.A = PS2_BUTTON_SINGLE;
+    ps2_data.B = PS2_BUTTON_DOUBLE;
+    ps2_data.C = PS2_BUTTON_LONG;
+    gattc_write_demo(&ps2_data,sizeof(ps2_button_data));
+}
+
 void i2c_ps2_sensor_task(void *arg)
 {
-    uint8_t data[LEN];
-    for(uint8_t i=0;i<LEN;i++){
-        data[i] = i+5;
-    }
     while(true){
         if(ble_client_is_connect()){
-            gattc_write_demo(data,LEN);
+            send_ps2_data_test();
             printf("[%s] already connected\r\n",__func__);
         }
         else{
