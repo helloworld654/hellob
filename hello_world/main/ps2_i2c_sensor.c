@@ -53,7 +53,7 @@ void i2c_ps2_sensor_task(void *arg)
         else{
             // printf("[%s] not connect\r\n",__func__);
         }
-        vTaskDelay(500/portTICK_PERIOD_MS);
+        vTaskDelay(200/portTICK_PERIOD_MS);
     }
 }
 

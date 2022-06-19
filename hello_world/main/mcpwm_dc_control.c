@@ -95,22 +95,26 @@ void pwm_example_config(void)
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &pwm_config);    //Configure PWM1A & PWM1B with above settings
 }
 
-void set_car_move(uint8_t forward,uint8_t left)
+/*  
+straight 1:forward,2:backward
+turn 1:left,2:right
+*/
+void set_car_move(uint8_t straight,uint8_t turn)
 {
     uint8_t car_speed = 50;
-    if(forward==1 && left==0){
+    if(straight==1 && turn==0){
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, car_speed);    //the left motor
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);    //the right motor
     }
-    else if(forward==2 && left==0){
+    else if(straight==2 && turn==0){
         brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0, car_speed);
         brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);
     }
-    else if(forward==0 && left==1){
+    else if(straight==0 && turn==1){
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);
     }
-    else if(forward==0 && left==2){
+    else if(straight==0 && turn==2){
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed);
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
     }
@@ -146,25 +150,47 @@ int send_ps2_data_to_motor_queue(uint8_t *p_data,uint32_t len)
     return 0;
 }
 
+static void print_data_test(uint8_t *p_data,uint32_t len)
+{
+    for(uint8_t i=0;i<len;i++){
+        printf("%02x ",p_data[i]);
+    }
+    printf("\r\n");
+}
+
 /**
  * @brief Configure MCPWM module for brushed dc motor
  */
 static void mcpwm_example_brushed_motor_control(void *arg)
 {
     ps2_button_data ps2_data;
-    uint8_t *p_data;
     //1. mcpwm gpio initialization
     mcpwm_example_gpio_initialize();
     pwm_example_config();
     ps2_msg_queue_handle = xQueueCreate(MOTOR_PS2_QUEUE_SIZE,sizeof(ps2_button_data));
     while (1) {
         if(xQueueReceive(ps2_msg_queue_handle,&ps2_data,0xffffffff)){
-            p_data = (uint8_t *)&ps2_data;
-            printf("[%s] data:",__func__);
-            for(uint8_t i=0;i<sizeof(ps2_button_data);i++){
-                printf("%02x ",p_data[i]);
+            if(ps2_data.x_val < 100){
+                // turn left
+                set_car_move(0,1);
             }
-            printf("\r\n");
+            else if(ps2_data.x_val > 150){
+                // turn right
+                set_car_move(0,2);
+            }
+            else if(ps2_data.y_val > 150){
+                // forward
+                set_car_move(1,0);
+            }
+            else if(ps2_data.y_val < 100){
+                // backward
+                set_car_move(2,0);
+            }
+            else{
+                print_data_test(&ps2_data,sizeof(ps2_button_data));
+            }
+            vTaskDelay(300/portTICK_PERIOD_MS);
+            set_car_move(0,0);
         }
     }
 }
