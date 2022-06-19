@@ -1,8 +1,6 @@
 #ifndef __I2C_PROTOCOL_H__
 #define __I2C_PROTOCOL_H__
 
-#if 0
-
 #define I2C_MASTER_SCL_IO 19               /*!< gpio number for I2C master clock */    // set the gpio num same to default idf sdk
 #define I2C_MASTER_SDA_IO 18               /*!< gpio number for I2C master data  */    // set the gpio num same to default idf sdk
 #define I2C_MASTER_NUM 1 /*!< I2C port number for master dev */    // get it from default idf sdk
@@ -18,6 +16,8 @@
 #define ACK_VAL 0x0                             /*!< I2C ack value */
 #define NACK_VAL 0x1                            /*!< I2C nack value */
 
-#endif
+esp_err_t i2c_master_init(void);
+
+uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size);
 
 #endif

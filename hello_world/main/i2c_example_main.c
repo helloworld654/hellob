@@ -11,6 +11,8 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+#if 0    // first use this i2c protocol for mpu6050 only,now change to i2c_protocol.c for common use
+
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
@@ -349,3 +351,5 @@ void i2c_app_main(void)
     xTaskCreate(i2c_test_task, "i2c_test_task_1", 1024 * 2, (void *)1, 10, NULL);
 #endif
 }
+
+#endif

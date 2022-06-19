@@ -1,6 +1,10 @@
 #ifndef __PS2_SENSOR_H__
 #define __PS2_SENSOR_H__
 
+// #define JOYSTICK_I2C_ADDR         0x5A
+#define JOYSTICK_LEFT_X_REG       0x10
+#define JOYSTICK_LEFT_Y_REG       0x11
+
 typedef enum{
     PS2_BUTTON_NORMAL,
     PS2_BUTTON_SINGLE,

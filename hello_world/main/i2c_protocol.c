@@ -11,7 +11,6 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
-#if 0
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
@@ -20,6 +19,9 @@
 #include "hello_world_main.h"
 #include "freertos/timers.h"
 #include "i2c_protocol.h"
+
+// #define SENSOR_I2C_ADDR    0x68   // slave address for MPU6050 sensor
+#define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
 
 //  return 0: success    other: fail
 uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
@@ -31,7 +33,7 @@ uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
@@ -42,7 +44,7 @@ uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
 
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (MPU6050_SENSOR_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (SENSOR_I2C_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
     if (size > 1) {
         i2c_master_read(cmd, data_rd, size - 1, ACK_VAL);
     }
@@ -76,7 +78,7 @@ static esp_err_t i2c_master_sensor_write_reg(i2c_port_t i2c_num, uint8_t reg_add
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_data, ACK_CHECK_EN);
     i2c_master_stop(cmd);
@@ -92,7 +94,7 @@ static esp_err_t i2c_master_sensor_write_reg(i2c_port_t i2c_num, uint8_t reg_add
     vTaskDelay(30 / portTICK_RATE_MS);
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, MPU6050_SENSOR_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
     i2c_master_read_byte(cmd, data_h, ACK_VAL);
     i2c_master_read_byte(cmd, data_l, NACK_VAL);
     i2c_master_stop(cmd);
@@ -131,5 +133,3 @@ esp_err_t i2c_master_init(void)
     }
     return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }
-
-#endif

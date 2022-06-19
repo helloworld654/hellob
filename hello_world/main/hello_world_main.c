@@ -43,6 +43,7 @@ void app_main(void)
     gatts_app_main();
 #endif
 
+    i2c_ps2_app_main();
     printf("Hello world!\n");
     while(1)
     {

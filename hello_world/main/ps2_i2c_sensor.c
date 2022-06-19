@@ -4,6 +4,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "ps2_i2c_sensor.h"
+#include "i2c_protocol.h"
 
 extern uint8_t ble_client_is_connect(void);
 extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
@@ -23,7 +24,9 @@ void send_ps2_data_test(void)
 
 void i2c_ps2_sensor_task(void *arg)
 {
+    uint8_t rd_data = 0;
     while(true){
+#if 0
         if(ble_client_is_connect()){
             send_ps2_data_test();
             printf("[%s] already connected\r\n",__func__);
@@ -31,13 +34,15 @@ void i2c_ps2_sensor_task(void *arg)
         else{
             printf("[%s] not connect\r\n",__func__);
         }
-
+#endif
+        i2c_read_sensor_reg(JOYSTICK_LEFT_X_REG,&rd_data,1);
+        printf("[%s] read data:%d\r\n",__func__,rd_data);
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 }
 
 void i2c_ps2_app_main(void)
 {
-    // ESP_ERROR_CHECK(i2c_master_init());
+    ESP_ERROR_CHECK(i2c_master_init());
     xTaskCreate(i2c_ps2_sensor_task, "i2c_ps2_sensor_task", 1024 * 2, NULL, 10, NULL);
 }
