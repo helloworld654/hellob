@@ -101,7 +101,9 @@ turn 1:left,2:right
 */
 void set_car_move(uint8_t straight,uint8_t turn)
 {
-    uint8_t car_speed = 50;
+    uint8_t car_speed,turn_speed;
+    car_speed = 50;
+    turn_speed = 20;
     if(straight==1 && turn==0){
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, car_speed);    //the left motor
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed);    //the right motor
@@ -117,6 +119,23 @@ void set_car_move(uint8_t straight,uint8_t turn)
     else if(straight==0 && turn==2){
         brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed);
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    }
+
+    else if(straight==1 && turn==1){
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed-turn_speed);
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed+turn_speed);
+    }
+    else if(straight==1 && turn==2){
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed+turn_speed);
+        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed-turn_speed);
+    }
+    else if(straight==2 && turn==1){
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed-turn_speed);
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed+turn_speed);
+    }
+    else if(straight==2 && turn==2){
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0,car_speed+turn_speed);
+        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, car_speed-turn_speed);
     }
     else{
         brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
@@ -164,31 +183,34 @@ static void print_data_test(uint8_t *p_data,uint32_t len)
 static void mcpwm_example_brushed_motor_control(void *arg)
 {
     ps2_button_data ps2_data;
+    uint8_t str_val,turn_val;
     //1. mcpwm gpio initialization
     mcpwm_example_gpio_initialize();
     pwm_example_config();
     ps2_msg_queue_handle = xQueueCreate(MOTOR_PS2_QUEUE_SIZE,sizeof(ps2_button_data));
     while (1) {
         if(xQueueReceive(ps2_msg_queue_handle,&ps2_data,0xffffffff)){
+            str_val = turn_val = 0;
             if(ps2_data.x_val < 100){
                 // turn left
-                set_car_move(0,1);
+                turn_val = 1;
             }
             else if(ps2_data.x_val > 150){
                 // turn right
-                set_car_move(0,2);
+                turn_val = 2;
             }
-            else if(ps2_data.y_val > 150){
+            if(ps2_data.y_val > 150){
                 // forward
-                set_car_move(1,0);
+                str_val = 1;
             }
             else if(ps2_data.y_val < 100){
                 // backward
-                set_car_move(2,0);
+                str_val = 2;
             }
             else{
                 print_data_test(&ps2_data,sizeof(ps2_button_data));
             }
+            set_car_move(str_val,turn_val);
             vTaskDelay(300/portTICK_PERIOD_MS);
             set_car_move(0,0);
         }
