@@ -10,6 +10,10 @@
 #define BUTOON_RIGHT_REG          0x23    //same as up state
 #define BUTOON_UP_REG             0x22    //same as up state
 #define BUTOON_DOWN_REG           0x21    //same as up state
+//  the double click function is not correct
+
+#define JOY_NORMAL_VAL    128
+#define BUTTON_NORMAL_VAL   8
 
 typedef enum{
     PS2_BUTTON_NORMAL,
@@ -19,13 +23,16 @@ typedef enum{
 }PS2_BUTTON_VAL;
 
 typedef struct PS2_BUTTON_DATA_T{
-    uint8_t X_DATA;
-    uint8_t Y_DATA;
-    uint8_t Z;
-    uint8_t A;
-    uint8_t B;
-    uint8_t C;
-    uint8_t D;
+    uint8_t x_val;
+    uint8_t y_val;
+    uint8_t button_joys;
+
+    uint8_t button_l;
+    uint8_t button_r;
+    uint8_t button_up;
+    uint8_t button_dn;
+
+    uint8_t changed;
 }ps2_button_data;
 
 void i2c_ps2_app_main(void);
