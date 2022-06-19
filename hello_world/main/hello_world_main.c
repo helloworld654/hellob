@@ -35,7 +35,7 @@ void app_main(void)
 
 #if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
     gattc_app_main();
-    // i2c_app_main();
+    i2c_ps2_app_main();
 #endif
 
 #if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
@@ -43,7 +43,6 @@ void app_main(void)
     pwm_app_main();
 #endif
 
-    i2c_ps2_app_main();
     printf("Hello world!\n");
     while(1)
     {

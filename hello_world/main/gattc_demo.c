@@ -350,7 +350,6 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
         //the unit of the duration is second
         uint32_t duration = 30;
         esp_ble_gap_start_scanning(duration);
-        led_mode = 1;
         break;
     }
     case ESP_GAP_BLE_SCAN_START_COMPLETE_EVT:
@@ -360,6 +359,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             break;
         }
         ESP_LOGI(GATTC_TAG, "scan start success");
+        led_mode = 1;
 
         break;
     case ESP_GAP_BLE_SCAN_RESULT_EVT: {
