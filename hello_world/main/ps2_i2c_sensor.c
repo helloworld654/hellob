@@ -24,7 +24,7 @@ void send_ps2_data_test(void)
 
 void i2c_ps2_sensor_task(void *arg)
 {
-    uint8_t rd_data = 0;
+    uint8_t x_val,y_val,button_l,button_r,button_up,button_dn,button_joys;
     while(true){
 #if 0
         if(ble_client_is_connect()){
@@ -35,9 +35,19 @@ void i2c_ps2_sensor_task(void *arg)
             printf("[%s] not connect\r\n",__func__);
         }
 #endif
-        i2c_read_sensor_reg(JOYSTICK_LEFT_X_REG,&rd_data,1);
-        printf("[%s] read data:%d\r\n",__func__,rd_data);
-        vTaskDelay(1000/portTICK_PERIOD_MS);
+        i2c_read_sensor_reg(JOYSTICK_LEFT_X_REG,&x_val,1);
+        i2c_read_sensor_reg(JOYSTICK_LEFT_Y_REG,&y_val,1);
+        i2c_read_sensor_reg(JOYSTICK_BUTTON_REG,&button_joys,1);
+
+        i2c_read_sensor_reg(BUTOON_LEFT_REG,&button_l,1);
+        i2c_read_sensor_reg(BUTOON_RIGHT_REG,&button_r,1);
+        i2c_read_sensor_reg(BUTOON_UP_REG,&button_up,1);
+        i2c_read_sensor_reg(BUTOON_DOWN_REG,&button_dn,1);
+
+        printf("[%s] x_val:%d,y_val:%d,button_joys:%d,button_l:%d,button_r:%d,button_up:%d,button_dn:%d,\r\n",  \
+                __func__,x_val,y_val,button_joys,button_l,button_r,button_up,button_dn);
+
+        vTaskDelay(500/portTICK_PERIOD_MS);
     }
 }
 
