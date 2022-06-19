@@ -39,8 +39,8 @@ void app_main(void)
 #endif
 
 #if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
-    gatts_app_main();
     pwm_app_main();
+    gatts_app_main();
 #endif
 
     printf("Hello world!\n");

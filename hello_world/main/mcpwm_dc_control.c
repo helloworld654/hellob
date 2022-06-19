@@ -17,11 +17,17 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
 #include "esp_attr.h"
 
 #include "driver/mcpwm.h"
 #include "soc/mcpwm_periph.h"
 #include "hello_world_main.h"
+#include "ps2_i2c_sensor.h"
+
+#define MOTOR_PS2_QUEUE_SIZE    20
+
+void *ps2_msg_queue_handle;
 
 #define GPIO_PWM0A_OUT 19   //Set GPIO 19 as PWM0A
 #define GPIO_PWM0B_OUT 18   //Set GPIO 18 as PWM0B
@@ -114,28 +120,52 @@ void set_car_move(uint8_t forward,uint8_t left)
     }
 }
 
+static void pwm_motor_test(void)
+{
+    brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, 50.0);
+    brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, 60.0);
+    vTaskDelay(1000 / portTICK_RATE_MS);
+    brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0, 30.0);
+    brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, 40.0);
+    vTaskDelay(1000 / portTICK_RATE_MS);
+    brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
+    brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
+    vTaskDelay(2000 / portTICK_RATE_MS);
+}
+
+int send_ps2_data_to_motor_queue(uint8_t *p_data,uint32_t len)
+{
+    if(len != sizeof(ps2_button_data)){
+        printf("[%s] Send to queue fail,because the len is not corrent\r\n",__func__);
+        return 1;
+    }
+    if(xQueueSend(ps2_msg_queue_handle,p_data,500) != pdPASS){
+        printf("[%s] Send to queue fail!\r\n",__func__);
+        return 2;
+    }
+    return 0;
+}
+
 /**
  * @brief Configure MCPWM module for brushed dc motor
  */
 static void mcpwm_example_brushed_motor_control(void *arg)
 {
+    ps2_button_data ps2_data;
+    uint8_t *p_data;
     //1. mcpwm gpio initialization
     mcpwm_example_gpio_initialize();
     pwm_example_config();
+    ps2_msg_queue_handle = xQueueCreate(MOTOR_PS2_QUEUE_SIZE,sizeof(ps2_button_data));
     while (1) {
-#if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
-#else
-        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_0, 50.0);
-        brushed_motor_forward(MCPWM_UNIT_0, MCPWM_TIMER_1, 60.0);
-        vTaskDelay(1000 / portTICK_RATE_MS);
-        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_0, 30.0);
-        brushed_motor_backward(MCPWM_UNIT_0, MCPWM_TIMER_1, 40.0);
-        vTaskDelay(1000 / portTICK_RATE_MS);
-        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_0);
-        brushed_motor_stop(MCPWM_UNIT_0, MCPWM_TIMER_1);
-        vTaskDelay(2000 / portTICK_RATE_MS);
-#endif
-        vTaskDelay(1000 / portTICK_RATE_MS);
+        if(xQueueReceive(ps2_msg_queue_handle,&ps2_data,0xffffffff)){
+            p_data = (uint8_t *)&ps2_data;
+            printf("[%s] data:",__func__);
+            for(uint8_t i=0;i<sizeof(ps2_button_data);i++){
+                printf("%02x ",p_data[i]);
+            }
+            printf("\r\n");
+        }
     }
 }
 
