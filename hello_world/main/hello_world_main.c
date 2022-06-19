@@ -14,6 +14,7 @@
 #include "esp_spi_flash.h"
 #include "driver/gpio.h"
 #include "hello_world_main.h"
+#include "ps2_i2c_sensor.h"
 
 #define BLINK_GPIO    2
 
@@ -42,6 +43,7 @@ void app_main(void)
     pwm_app_main();
 #endif
 
+    i2c_ps2_app_main();
     printf("Hello world!\n");
     while(1)
     {
