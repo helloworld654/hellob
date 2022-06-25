@@ -3,6 +3,7 @@
 
 #define QUEUE_TEST    0
 #define SEM_TEST    0
+#define MUTEX_TEST    0
 
 typedef struct{
     uint8_t type;
