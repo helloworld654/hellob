@@ -1,0 +1,2 @@
+生成反汇编指令：
+xtensa-esp32-elf-objdump -S build/hello-world.elf > hello-world.dis

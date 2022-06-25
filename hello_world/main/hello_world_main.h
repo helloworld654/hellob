@@ -5,6 +5,8 @@
 
 #define BLE_CAR_SERVER    0
 
+#define FREERTOS_STUDY    1
+
 #if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) && \
     (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
 #error "cannot defined client and server at same time"

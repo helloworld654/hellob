@@ -15,6 +15,7 @@
 #include "driver/gpio.h"
 #include "hello_world_main.h"
 #include "ps2_i2c_sensor.h"
+#include "freertos_study.h"
 
 #define BLINK_GPIO    2
 
@@ -27,11 +28,14 @@ uint8_t led_mode;
 
 void app_main(void)
 {
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
+    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
     gpio_reset_pin(BLINK_GPIO);
     gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
     gpio_set_level(BLINK_GPIO, 0);  // set led off
     uint32_t led_interval = 0;
     led_mode = 0;
+#endif
 
 #if defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT
     gattc_app_main();
@@ -41,6 +45,10 @@ void app_main(void)
 #if defined(BLE_CAR_SERVER) && BLE_CAR_SERVER
     pwm_app_main();
     gatts_app_main();
+#endif
+
+#if defined(FREERTOS_STUDY) && FREERTOS_STUDY
+    task_create_test();
 #endif
 
     printf("Hello world!\n");
@@ -73,7 +81,7 @@ void app_main(void)
             vTaskDelay(led_interval/portTICK_PERIOD_MS);
         }
 #else
-        printf("every cycle test\r\n");
+        // printf("every cycle test\r\n");
         vTaskDelay(1000/portTICK_PERIOD_MS);
 #endif
     }
