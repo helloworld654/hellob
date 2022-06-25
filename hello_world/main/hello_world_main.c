@@ -46,6 +46,8 @@ void app_main(void)
     printf("Hello world!\n");
     while(1)
     {
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
+    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         switch(led_mode){
             case 0:
                 led_interval = 80;
@@ -70,5 +72,9 @@ void app_main(void)
             gpio_set_level(BLINK_GPIO, 1);
             vTaskDelay(led_interval/portTICK_PERIOD_MS);
         }
+#else
+        printf("every cycle test\r\n");
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+#endif
     }
 }
