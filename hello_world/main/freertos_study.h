@@ -5,7 +5,9 @@
 #define SEM_TEST    0
 #define MUTEX_TEST    0
 
-#define EVENT_GROUP    1
+#define EVENT_GROUP_TEST    0
+
+#define TIMER_TEST    1
 
 typedef struct{
     uint8_t type;

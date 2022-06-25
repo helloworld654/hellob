@@ -6,6 +6,7 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/event_groups.h"
+#include "freertos/timers.h"
 #include "freertos_study.h"
 
 #define RTOS_TASK_STACK_SIZE    2048
@@ -118,9 +119,7 @@ static void rtos_study_task_B(void *arg)
     }
 }
 
-#if defined(EVENT_GROUP) && EVENT_GROUP
 void *event_group_handle;
-#endif
 
 static void rtos_event_task_A(void *arg)
 {
@@ -171,6 +170,28 @@ static void rtos_event_task_C(void *arg)
     }
 }
 
+void *test_timer_handle;
+
+void test_timer_callback(void *arg)
+{
+    uint32_t timer_id;
+    timer_id = pvTimerGetTimerID(arg);
+    printf("\r\n[%s] timer id:%d",__func__,timer_id);
+}
+
+static void rtos_timer_task(void *arg)
+{
+    printf("\r\n[%s] enter",__func__);
+    test_timer_handle = xTimerCreate("test timer",1000/portTICK_PERIOD_MS,true,5,test_timer_callback);
+    if(test_timer_handle){
+        xTimerStart(test_timer_handle,1000/portTICK_PERIOD_MS);
+    }
+    while(1){
+        // printf("\r\ntimer test");
+        vTaskDelay(1000/portTICK_PERIOD_MS);
+    }
+}
+
 void task_create_test(void)
 {
 #if (defined(QUEUE_TEST) && QUEUE_TEST) || \
@@ -180,10 +201,14 @@ void task_create_test(void)
     xTaskCreate(rtos_study_task_B,"study_task_B",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,rtos_study_task_handle_B);
 #endif
 
-#if defined(EVENT_GROUP) && EVENT_GROUP
+#if defined(EVENT_GROUP_TEST) && EVENT_GROUP_TEST
     xTaskCreate(rtos_event_task_A,"event_task_A",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
     xTaskCreate(rtos_event_task_B,"event_task_B",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
     xTaskCreate(rtos_event_task_C,"event_task_C",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
+#endif
+
+#if defined(TIMER_TEST) && TIMER_TEST
+    xTaskCreate(rtos_timer_task,"timer_task",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
 #endif
 
 }
