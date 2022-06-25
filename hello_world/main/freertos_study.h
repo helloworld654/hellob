@@ -5,6 +5,8 @@
 #define SEM_TEST    0
 #define MUTEX_TEST    0
 
+#define EVENT_GROUP    1
+
 typedef struct{
     uint8_t type;
     void *p_data;

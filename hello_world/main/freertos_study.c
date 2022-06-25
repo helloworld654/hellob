@@ -5,6 +5,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
+#include "freertos/event_groups.h"
 #include "freertos_study.h"
 
 #define RTOS_TASK_STACK_SIZE    2048
@@ -26,7 +27,7 @@ void *rtos_study_sem_handle;
 void *rtos_study_mutex_handle;
 #endif
 
-static void rtos_study_task_a(void *arg)
+static void rtos_study_task_A(void *arg)
 {
     printf("[%s] enter\r\n",__func__);
 #if defined(QUEUE_TEST) && QUEUE_TEST
@@ -70,7 +71,7 @@ static void rtos_study_task_a(void *arg)
     }
 }
 
-static void rtos_study_task_b(void *arg)
+static void rtos_study_task_B(void *arg)
 {
     printf("[%s] enter\r\n",__func__);
 #if defined(QUEUE_TEST) && QUEUE_TEST
@@ -117,8 +118,72 @@ static void rtos_study_task_b(void *arg)
     }
 }
 
+#if defined(EVENT_GROUP) && EVENT_GROUP
+void *event_group_handle;
+#endif
+
+static void rtos_event_task_A(void *arg)
+{
+    printf("\r\n[%s] enter",__func__);
+    event_group_handle = xEventGroupCreate();
+    while(1){
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        printf("\r\n[%s] SET event bit 0x80",__func__);
+        xEventGroupSetBits(event_group_handle,0x80);
+        
+        vTaskDelay(500/portTICK_PERIOD_MS);
+        printf("\r\n[%s] SET event bit 0x800",__func__);
+        xEventGroupSetBits(event_group_handle,0x800);
+    }
+}
+
+static void rtos_event_task_B(void *arg)
+{
+    printf("\r\n[%s] enter",__func__);
+    while(1){
+        if(event_group_handle){
+            printf("\r\n[%s] start wait event 0x80",__func__);
+            if(xEventGroupWaitBits(event_group_handle,0x80,true,false,1000/portTICK_PERIOD_MS)){
+                printf("\r\n[%s]get the event SUCCESS",__func__);
+            }
+            else{
+                printf("\r\n[%s]get event timeout",__func__);
+            }
+        }
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }
+}
+
+static void rtos_event_task_C(void *arg)
+{
+    printf("\r\n[%s] enter",__func__);
+    while(1){
+        if(event_group_handle){
+            printf("\r\n[%s] start wait event 0x880",__func__);
+            if(xEventGroupWaitBits(event_group_handle,0x880,true,true,1000/portTICK_PERIOD_MS)){
+                printf("\r\n[%s]get the event SUCCESS",__func__);
+            }
+            else{
+                printf("\r\n[%s]get event timeout",__func__);
+            }
+        }
+        vTaskDelay(10/portTICK_PERIOD_MS);
+    }
+}
+
 void task_create_test(void)
 {
-    xTaskCreate(rtos_study_task_a,"study_task_A",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,rtos_study_task_handle_A);  // stack size should more than 2048
-    xTaskCreate(rtos_study_task_b,"study_task_B",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,rtos_study_task_handle_B);
+#if (defined(QUEUE_TEST) && QUEUE_TEST) || \
+    (defined(SEM_TEST) && SEM_TEST) || \
+    (defined(MUTEX_TEST) && MUTEX_TEST)
+    xTaskCreate(rtos_study_task_A,"study_task_A",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,rtos_study_task_handle_A);  // stack size should more than 2048
+    xTaskCreate(rtos_study_task_B,"study_task_B",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,rtos_study_task_handle_B);
+#endif
+
+#if defined(EVENT_GROUP) && EVENT_GROUP
+    xTaskCreate(rtos_event_task_A,"event_task_A",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
+    xTaskCreate(rtos_event_task_B,"event_task_B",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
+    xTaskCreate(rtos_event_task_C,"event_task_C",RTOS_TASK_STACK_SIZE,NULL,RTOS_TASK_PRIORITY,NULL);
+#endif
+
 }
