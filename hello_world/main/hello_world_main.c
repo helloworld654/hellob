@@ -16,6 +16,7 @@
 #include "hello_world_main.h"
 #include "ps2_i2c_sensor.h"
 #include "freertos_study.h"
+#include "ble_at_cmd.h"
 
 #define BLINK_GPIO    2
 
@@ -51,7 +52,10 @@ void app_main(void)
     task_create_test();
 #endif
 
-    printf("Hello world!\n");
+#if defined(BLE_AT_TEST) && BLE_AT_TEST
+    at_cmd_task_init();
+#endif
+
     while(1)
     {
 #if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
@@ -81,7 +85,7 @@ void app_main(void)
             vTaskDelay(led_interval/portTICK_PERIOD_MS);
         }
 #else
-        // printf("every cycle test\r\n");
+        // printf("\r\n[%s] Hello world",__func__);
         vTaskDelay(1000/portTICK_PERIOD_MS);
 #endif
     }
