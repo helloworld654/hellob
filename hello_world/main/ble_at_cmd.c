@@ -34,6 +34,7 @@ void start_ble_central(uint8_t argc,char *argv[])
     gattc_app_main();
 }
 
+  // conn,58bf253344e6  connect to 58:bf:25:33:44:e6
 void establish_connection(uint8_t argc,char *argv[])
 {
     uint8_t i,bt_addr[6];
@@ -50,6 +51,7 @@ void establish_connection(uint8_t argc,char *argv[])
     connect_to_peripheral(bt_addr);
 }
 
+// atw,030405  gatt write 0x03 0x04 0x05
 void gatt_write_cmd(uint8_t argc,char *argv[])
 {
     uint8_t length,*p_data = NULL;
@@ -61,6 +63,7 @@ void gatt_write_cmd(uint8_t argc,char *argv[])
     free(p_data);
 }
 
+// atno,123456  notification 0x12 0x34 0x56
 void gatt_notify_cmd(uint8_t argc,char *argv[])
 {
     uint8_t length,*p_data = NULL;
@@ -72,6 +75,7 @@ void gatt_notify_cmd(uint8_t argc,char *argv[])
     free(p_data);
 }
 
+// start scanning
 void cent_start_ble_scan(uint8_t argc,char *argv[])
 {
     if(argc == 1){
@@ -83,6 +87,7 @@ void cent_start_ble_scan(uint8_t argc,char *argv[])
     }
 }
 
+// stop scanning
 void cent_stop_ble_scan(uint8_t argc,char *argv[])
 {
     esp_ble_gap_stop_scanning();
