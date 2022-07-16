@@ -15,6 +15,7 @@
 #include "esp_log.h"
 #include "user_cmd.h"
 #include "esp_gap_ble_api.h"
+#include "ble_at_cmd.h"
 
 static const char *TAG = "uart_events";
 
@@ -157,6 +158,9 @@ void parse_at_cmd(uint8_t *p_data,uint8_t length)
             break;
         }
     }
+    if(i == cmd_actual_num){
+        printf("[%s] Unknown at command\r\n",__func__);
+    }
 }
 
 static void uart_event_task(void *pvParameters)
@@ -179,7 +183,7 @@ static void uart_event_task(void *pvParameters)
                     uart_read_bytes(EX_UART_NUM, dtmp, event.size, portMAX_DELAY);
                     ESP_LOGI(TAG, "[DATA EVT]:");
                     uart_write_bytes(EX_UART_NUM, (const char*) dtmp, event.size);
-                    parse_at_cmd(dtmp,event.size);
+                    send_uart_data_to_at_task(dtmp,event.size);
                     break;
                 //Event of HW FIFO overflow detected
                 case UART_FIFO_OVF:

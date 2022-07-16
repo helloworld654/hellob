@@ -54,6 +54,7 @@ void app_main(void)
 
 #if defined(BLE_AT_TEST) && BLE_AT_TEST
     at_cmd_task_init();
+    uart_evnet_app_main();
 #endif
 
     while(1)
