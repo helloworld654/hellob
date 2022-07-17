@@ -60,6 +60,7 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 #define PREPARE_BUF_MAX_SIZE 1024
 
 static uint8_t char1_str[] = {0x11,0x22,0x33};
+static uint8_t char2_str[] = {0xaa,0xbb,0xcc};
 static esp_gatt_char_prop_t a_property = 0;
 static esp_gatt_char_prop_t b_property = 0;
 #if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
@@ -71,6 +72,13 @@ static esp_attr_value_t gatts_demo_char1_val =
     .attr_max_len = GATTS_DEMO_CHAR_VAL_LEN_MAX,
     .attr_len     = sizeof(char1_str),
     .attr_value   = char1_str,
+};
+
+static esp_attr_value_t gatts_demo_char2_val =
+{
+    .attr_max_len = GATTS_DEMO_CHAR_VAL_LEN_MAX,
+    .attr_len     = sizeof(char2_str),
+    .attr_value   = char2_str,
 };
 
 static uint8_t adv_config_done = 0;
@@ -310,7 +318,7 @@ static void print_bt_addr(void)
 {
     uint8_t bt_addr[6],addr_type;
     esp_ble_gap_get_local_used_addr(bt_addr,&addr_type);
-    printf("local bt addr:");
+    printf("[%s] Local bt addr:",__func__);
     for(uint8_t i=0;i<6;i++){
         printf("%02x ",bt_addr[i]);
     }
@@ -328,7 +336,6 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     switch (event) {
     case ESP_GATTS_REG_EVT:
         ESP_LOGI(GATTS_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
-        print_bt_addr();
         gl_profile_tab[PROFILE_A_APP_ID].service_id.is_primary = true;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.inst_id = 0x00;
         gl_profile_tab[PROFILE_A_APP_ID].service_id.id.uuid.len = ESP_UUID_LEN_16;
@@ -367,15 +374,18 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_ble_gatts_create_service(gatts_if, &gl_profile_tab[PROFILE_A_APP_ID].service_id, GATTS_NUM_HANDLE_TEST_A);
         break;
     case ESP_GATTS_READ_EVT: {
+        uint16_t length = 0;
+        const uint8_t *prf_char;
+        esp_err_t get_attr_ret = esp_ble_gatts_get_attr_value(param->read.handle,  &length, &prf_char);
+        if (get_attr_ret == ESP_FAIL){
+            ESP_LOGE(GATTS_TAG, "ILLEGAL HANDLE");
+        }
         ESP_LOGI(GATTS_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        rsp.attr_value.len = 4;
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xed;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+        rsp.attr_value.len = length;
+        memcpy(rsp.attr_value.value,prf_char,length);
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
         break;
@@ -484,6 +494,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         gl_profile_tab[PROFILE_A_APP_ID].descr_handle = param->add_char_descr.attr_handle;
         ESP_LOGI(GATTS_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
                  param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
+        print_bt_addr();
         break;
     case ESP_GATTS_DELETE_EVT:
         break;
@@ -548,15 +559,18 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_ble_gatts_create_service(gatts_if, &gl_profile_tab[PROFILE_B_APP_ID].service_id, GATTS_NUM_HANDLE_TEST_B);
         break;
     case ESP_GATTS_READ_EVT: {
+        uint16_t length = 0;
+        const uint8_t *prf_char;
+        esp_err_t get_attr_ret = esp_ble_gatts_get_attr_value(param->read.handle,  &length, &prf_char);
+        if (get_attr_ret == ESP_FAIL){
+            ESP_LOGE(GATTS_TAG, "ILLEGAL HANDLE");
+        }
         ESP_LOGI(GATTS_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         esp_gatt_rsp_t rsp;
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
         rsp.attr_value.handle = param->read.handle;
-        rsp.attr_value.len = 4;
-        rsp.attr_value.value[0] = 0xde;
-        rsp.attr_value.value[1] = 0xed;
-        rsp.attr_value.value[2] = 0xbe;
-        rsp.attr_value.value[3] = 0xef;
+        rsp.attr_value.len = length;
+        memcpy(rsp.attr_value.value,prf_char,length);
         esp_ble_gatts_send_response(gatts_if, param->read.conn_id, param->read.trans_id,
                                     ESP_GATT_OK, &rsp);
         break;
@@ -625,7 +639,7 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         esp_err_t add_char_ret =esp_ble_gatts_add_char( gl_profile_tab[PROFILE_B_APP_ID].service_handle, &gl_profile_tab[PROFILE_B_APP_ID].char_uuid,
                                                         ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                                                         b_property,
-                                                        NULL, NULL);
+                                                        &gatts_demo_char2_val, NULL);
         if (add_char_ret){
             ESP_LOGE(GATTS_TAG, "add char failed, error code =%x",add_char_ret);
         }
