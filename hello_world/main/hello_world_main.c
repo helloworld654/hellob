@@ -25,7 +25,10 @@ extern void gatts_app_main(void);
 extern void uart_evnet_app_main(void);
 extern void pwm_app_main(void);
 extern void i2c_app_main(void);
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
+    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
 uint8_t led_mode;
+#endif
 
 void app_main(void)
 {
