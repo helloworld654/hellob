@@ -62,8 +62,7 @@ static void gatts_profile_b_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
 static uint8_t char1_str[] = {0x11,0x22,0x33};
 static esp_gatt_char_prop_t a_property = 0;
 static esp_gatt_char_prop_t b_property = 0;
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
 extern uint8_t led_mode;
 #endif
 
@@ -208,8 +207,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         adv_config_done &= (~adv_config_flag);
         if (adv_config_done == 0){
             esp_ble_gap_start_advertising(&adv_params);
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
             led_mode = 1;
 #endif
         }
@@ -218,8 +216,7 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
         adv_config_done &= (~scan_rsp_config_flag);
         if (adv_config_done == 0){
             esp_ble_gap_start_advertising(&adv_params);
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
             led_mode = 1;
 #endif
         }
@@ -511,8 +508,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
         gl_profile_tab[PROFILE_A_APP_ID].conn_id = param->connect.conn_id;
         //start sent the update connection parameters to the peer device.
         esp_ble_gap_update_conn_params(&conn_params);
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         led_mode = 2;
 #endif
         break;
@@ -520,8 +516,7 @@ static void gatts_profile_a_event_handler(esp_gatts_cb_event_t event, esp_gatt_i
     case ESP_GATTS_DISCONNECT_EVT:
         ESP_LOGI(GATTS_TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x", param->disconnect.reason);
         esp_ble_gap_start_advertising(&adv_params);
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         led_mode = 1;
 #endif
         break;
