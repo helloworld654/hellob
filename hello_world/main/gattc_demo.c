@@ -46,8 +46,7 @@ static bool connect    = false;
 static bool get_server = false;
 static esp_gattc_char_elem_t *char_elem_result   = NULL;
 static esp_gattc_descr_elem_t *descr_elem_result = NULL;
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
 extern uint8_t led_mode;
 #endif
 
@@ -130,8 +129,7 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
             break;
         }
         ESP_LOGI(GATTC_TAG, "open success");
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         led_mode = 2;
 #endif
         break;
@@ -318,8 +316,7 @@ static void gattc_profile_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_
         connect = false;
         get_server = false;
         ESP_LOGI(GATTC_TAG, "ESP_GATTC_DISCONNECT_EVT, reason = %d", p_data->disconnect.reason);
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         led_mode = 3;
 #endif
         break;
@@ -370,8 +367,7 @@ static void esp_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
             break;
         }
         ESP_LOGI(GATTC_TAG, "scan start success");
-#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || \
-    (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
+#if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) || (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
         led_mode = 1;
 #endif
 
