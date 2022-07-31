@@ -7,7 +7,7 @@
 
 #define FREERTOS_STUDY    0
 
-#define BLE_AT_TEST    1
+#define BLE_AT_TEST    0
 
 #if (defined(BLE_CAR_CLIENT) && BLE_CAR_CLIENT) && \
     (defined(BLE_CAR_SERVER) && BLE_CAR_SERVER)
