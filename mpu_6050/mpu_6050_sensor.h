@@ -1,7 +1,7 @@
-#ifndef __MPU_6050_H__
-#define __MPU_6050_H__
+#ifndef __MPU_6050_SENSOR_H__
+#define __MPU_6050_SENSOR_H__
 
-#include "i2c_example_main.h"
+#include "i2c_protocol.h"
 
 #define MPU6050_SENSOR_ADDR 0x68   /*!< slave address for MPU6050 sensor */
 

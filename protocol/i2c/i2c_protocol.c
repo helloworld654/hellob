@@ -14,14 +14,14 @@
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
-#include "sdkconfig.h"
-#include "mpu_6050.h"
-#include "hello_world_main.h"
+// #include "sdkconfig.h"
+// #include "mpu_6050.h"
+// #include "hello_world_main.h"
 #include "freertos/timers.h"
 #include "i2c_protocol.h"
 
-// #define SENSOR_I2C_ADDR    0x68   // slave address for MPU6050 sensor
-#define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
+#define SENSOR_I2C_ADDR    0x68   // slave address for MPU6050 sensor
+// #define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
 
 //  return 0: success    other: fail
 uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
@@ -117,7 +117,7 @@ uint8_t i2c_write_sensor_reg(uint8_t reg_addr, uint8_t reg_data)
  */
 esp_err_t i2c_master_init(void)
 {
-    int i2c_master_port = I2C_MASTER_NUM;
+    int i2c_master_n = I2C_MASTER_NUM;
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_MASTER_SDA_IO,
@@ -127,9 +127,11 @@ esp_err_t i2c_master_init(void)
         .master.clk_speed = I2C_MASTER_FREQ_HZ,
         // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
     };
-    esp_err_t err = i2c_param_config(i2c_master_port, &conf);
+    printf("[%s] i2c_master_n:%d\r\n",__func__, i2c_master_n);
+    esp_err_t err = i2c_param_config(i2c_master_n, &conf);
     if (err != ESP_OK) {
+        printf("[%s] i2c_param_config fail,err:0x%x\r\n",__func__, err);
         return err;
     }
-    return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+    return i2c_driver_install(i2c_master_n, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }

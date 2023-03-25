@@ -2,7 +2,13 @@
 #include "stdint.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "mpu_6050.h"
+
+#include "mpu_6050_sensor.h"
+#include "i2c_protocol.h"
+
+#define MPU6050_TASK_STACK_SIZE    2048
+#define MPU6050_TASK_PRIORITY    1
+void *mpu6050_stack_task_handle = NULL;
 
 //  accl calcu for +/- 2g range
 #define ACCL_MAX    (65536)
@@ -26,7 +32,7 @@ uint8_t mpu6050_init(void)
         return 0;
     }
     else{
-        printf("mpu write failed\n");
+        printf("[%s] mpu write failed\r\n", __func__);
         return 1;
     }
 }
@@ -100,22 +106,42 @@ void calcu_move_by_accl(MPU_ACCL_VAL *p_accl_val,CAR_TO_MOVE *p_car_move)
 	}
 }
 
-extern uint8_t ble_client_is_connect(void);
-extern void gattc_write_demo(uint8_t *p_data,uint8_t length);
-void i2c_mpu6050_task(void *arg)
+static void i2c_mpu6050_task(void *arg)
 {
     MPU_ACCL_VAL accl_val;
-	CAR_TO_MOVE car_move;
-    mpu6050_init();
+	uint8_t mpu6050_init_success = 0;
+	int ret;
+	// CAR_TO_MOVE car_move;
+	ret = i2c_master_init();
+	if(ret){
+		mpu6050_init_success = 0;
+		printf("[%s] i2c master init fail:0x%x\r\n",__func__);
+	}
+    if(!mpu6050_init()){
+		mpu6050_init_success = 1;
+		printf("[%s] mpu 6050 init success\r\n",__func__);
+	}
+	else{
+		mpu6050_init_success = 0;
+		printf("[%s] mpu 6050 init FAIL\r\n",__func__);
+	}
     while(1){
-        if(ble_client_is_connect()){
-            mpu6050_read_accl(&accl_val);
-            printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
-			calcu_move_by_accl(&accl_val,&car_move);
-			printf("car forward:%d,   left:%d\r\n",car_move.to_forward,car_move.to_left);
-            gattc_write_demo(&car_move,sizeof(car_move));
-        }
-        vTaskDelay(50/portTICK_RATE_MS);
+		if(mpu6050_init_success){
+			mpu6050_read_accl(&accl_val);
+			printf("acclx:%.3f,   accly:%.3f,   acclz:%.3f\r\n",accl_val.x,accl_val.y,accl_val.z);
+			// calcu_move_by_accl(&accl_val,&car_move);
+			// printf("car forward:%d,   left:%d\r\n",car_move.to_forward,car_move.to_left);
+			printf("hello world\r\n");
+			vTaskDelay(1000/portTICK_RATE_MS);
+		}
+		vTaskDelay(100/portTICK_RATE_MS);
     }
     vTaskDelete(NULL);
+}
+
+int mpu_6050_sensor_init(void)
+{
+    printf("[%s] enter\r\n",__func__);
+    xTaskCreate(i2c_mpu6050_task, "mpu 6050 task", MPU6050_TASK_STACK_SIZE, NULL, MPU6050_TASK_PRIORITY, &mpu6050_stack_task_handle);
+    return 0;
 }
