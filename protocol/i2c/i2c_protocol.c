@@ -14,14 +14,11 @@
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
-// #include "sdkconfig.h"
-// #include "mpu_6050.h"
-// #include "hello_world_main.h"
 #include "freertos/timers.h"
 #include "i2c_protocol.h"
 
-#define SENSOR_I2C_ADDR    0x68   // slave address for MPU6050 sensor
 // #define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
+static uint8_t i2c_slave_addr = 0;
 
 //  return 0: success    other: fail
 uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
@@ -33,7 +30,7 @@ uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, i2c_slave_addr << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
@@ -44,7 +41,7 @@ uint8_t i2c_read_sensor_reg(uint8_t reg_addr,uint8_t *data_rd, size_t size)
 
     cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (SENSOR_I2C_ADDR << 1) | READ_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, (i2c_slave_addr << 1) | READ_BIT, ACK_CHECK_EN);
     if (size > 1) {
         i2c_master_read(cmd, data_rd, size - 1, ACK_VAL);
     }
@@ -78,7 +75,7 @@ static esp_err_t i2c_master_sensor_write_reg(i2c_port_t i2c_num, uint8_t reg_add
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, i2c_slave_addr << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_data, ACK_CHECK_EN);
     i2c_master_stop(cmd);
@@ -90,18 +87,6 @@ static esp_err_t i2c_master_sensor_write_reg(i2c_port_t i2c_num, uint8_t reg_add
     else{
         return 1;
     }
-#if 0
-    vTaskDelay(30 / portTICK_RATE_MS);
-    cmd = i2c_cmd_link_create();
-    i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, SENSOR_I2C_ADDR << 1 | READ_BIT, ACK_CHECK_EN);
-    i2c_master_read_byte(cmd, data_h, ACK_VAL);
-    i2c_master_read_byte(cmd, data_l, NACK_VAL);
-    i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_RATE_MS);
-    i2c_cmd_link_delete(cmd);
-    return ret;
-#endif
 }
 
 // return 0:success    other:fail
@@ -115,9 +100,10 @@ uint8_t i2c_write_sensor_reg(uint8_t reg_addr, uint8_t reg_data)
 /**
  * @brief i2c master initialization
  */
-esp_err_t i2c_master_init(void)
+esp_err_t i2c_master_init(uint8_t slave_addr)
 {
     int i2c_master_n = I2C_MASTER_NUM;
+    i2c_slave_addr = slave_addr;
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
         .sda_io_num = I2C_MASTER_SDA_IO,
@@ -127,7 +113,6 @@ esp_err_t i2c_master_init(void)
         .master.clk_speed = I2C_MASTER_FREQ_HZ,
         // .clk_flags = 0,          /*!< Optional, you can use I2C_SCLK_SRC_FLAG_* flags to choose i2c source clock here. */
     };
-    printf("[%s] i2c_master_n:%d\r\n",__func__, i2c_master_n);
     esp_err_t err = i2c_param_config(i2c_master_n, &conf);
     if (err != ESP_OK) {
         printf("[%s] i2c_param_config fail,err:0x%x\r\n",__func__, err);

@@ -1,8 +1,6 @@
 #ifndef __MPU_6050_SENSOR_H__
 #define __MPU_6050_SENSOR_H__
 
-#include "i2c_protocol.h"
-
 #define MPU6050_SENSOR_ADDR 0x68   /*!< slave address for MPU6050 sensor */
 
 //****************************************
@@ -30,18 +28,13 @@
 #define	WHO_AM_I			0x75	//IIC地址寄存器(默认数值0x68，只读)
 #define	SlaveAddress	0xD0	//IIC写入时的地址字节数据，+1为读取
 
-typedef struct mpu_accl_val{
+typedef struct {
     float x;
     float y;
     float z;
-}MPU_ACCL_VAL;
+} MPU_ACCL_VAL;
 
-typedef struct car_to_move{
-    uint8_t to_forward;    // 0:not move,1:forward,2:backup
-    uint8_t to_left;    //  0:not move,1:left,2:right
-}CAR_TO_MOVE;
-
-uint8_t mpu6050_init(void);
+int mpu_6050_sensor_init(void);
 
 void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val);
 
