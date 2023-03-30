@@ -19,18 +19,18 @@ void *mpu6050_stack_task_handle = NULL;
 static uint8_t mpu6050_setting_init(void)
 {
 	int ret;
-	ret = i2c_master_init(MPU6050_SENSOR_ADDR);
+	ret = i2c_master_init();
 	if(ret){
 		printf("[%s] i2c master init fail,reason:0x%x\r\n",__func__,ret);
 		return ret;
 	}
-    if(!i2c_write_sensor_reg(PWR_MGMT_1,0x80)) {	//解除休眠状态
+    if(!i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, PWR_MGMT_1, 0x80)) {	//解除休眠状态
         vTaskDelay(100/portTICK_RATE_MS);
-    	i2c_write_sensor_reg(PWR_MGMT_1,0x00);
-        i2c_write_sensor_reg(ACCEL_CONFIG,0);    //  +/-2g
-        i2c_write_sensor_reg(SMPLRT_DIV,0x07);
-        i2c_write_sensor_reg(CONFIG,0x06);
-        i2c_write_sensor_reg(GYRO_CONFIG,0x18);
+    	i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, PWR_MGMT_1, 0x00);
+        i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, ACCEL_CONFIG,0);    //  +/-2g
+        i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, SMPLRT_DIV, 0x07);
+        i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, CONFIG, 0x06);
+        i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, GYRO_CONFIG, 0x18);
         printf("mpu 6050 init success\n");
         return 0;
     }
@@ -45,10 +45,10 @@ static uint16_t read_16bits_from_reg(uint8_t reg_addr)
 	uint16_t read_value = 0;
 	uint8_t read_byte;
 
-	i2c_read_sensor_reg(reg_addr,&read_byte,1);
+	i2c_read_sensor_reg(MPU6050_SENSOR_ADDR, reg_addr, &read_byte, 1);
 	read_value = read_value|(read_byte<<8);
 
-	i2c_read_sensor_reg(reg_addr+1,&read_byte,1);
+	i2c_read_sensor_reg(MPU6050_SENSOR_ADDR, reg_addr+1, &read_byte, 1);
 	read_value = read_value|read_byte;
 
 	return read_value;
