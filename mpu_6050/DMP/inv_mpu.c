@@ -16,6 +16,7 @@
  */
  
 #include "inv_mpu.h"
+#include "freertos_api.h"
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
@@ -40,7 +41,7 @@
 
 #define i2c_write   i2cWrite
 #define i2c_read    i2cRead
-#define delay_ms    delay_ms
+#define delay_ms    free_delay_ms
 #define get_ms      myget_ms
 
 //static int reg_int_cb(struct int_param_s *int_param)

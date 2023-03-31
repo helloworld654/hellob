@@ -21,7 +21,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "delay.h"
+// #include "delay.h"
 #include "ioi2c.h"
 
 #define INV_X_GYRO      (0x40)

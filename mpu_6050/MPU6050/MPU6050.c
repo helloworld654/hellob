@@ -1,4 +1,10 @@
+#include "stdio.h"
+#include "stdint.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "MPU6050.h"
+#include "i2c_protocol.h"
 
 //修改日志：2020 08-28 注释了所有的printf，保证没有printf的时候可以正常使用
 
@@ -161,8 +167,10 @@ void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,i
  * 6       | Reserved
  * 7       | Stops the clock and keeps the timing generator in reset
 *******************************************************************************/
-void MPU6050_setClockSource(uint8_t source){
-    IICwriteBits(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
+int MPU6050_setClockSource(uint8_t source){
+	int ret;
+    ret = IICwriteBits(devAddr, MPU6050_RA_PWR_MGMT_1, MPU6050_PWR1_CLKSEL_BIT, MPU6050_PWR1_CLKSEL_LENGTH, source);
+	return ret;
 
 }
 
@@ -202,7 +210,7 @@ void MPU6050_setSleepEnabled(uint8_t enabled) {
 *******************************************************************************/
 uint8_t MPU6050_getDeviceID(void) {
 
-    IICreadBytes(devAddr, MPU6050_RA_WHO_AM_I, 1, buffer);
+	i2c_read_sensor_reg(devAddr, MPU6050_RA_WHO_AM_I, buffer, 1);
     return buffer[0];
 }
 
@@ -235,14 +243,22 @@ void MPU6050_setI2CBypassEnabled(uint8_t enabled) {
 /**************************实现函数********************************************
 *函数原型:		void MPU6050_initialize(void)
 *功　　能:	    初始化 	MPU6050 以进入可用状态。
+return 0:success  1:fail
 *******************************************************************************/
-void MPU6050_initialize(void) {
-	MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO); //设置时钟
-	MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//陀螺仪最大量程 +-2000度每秒
-	MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//加速度度最大量程 +-2G
-	MPU6050_setSleepEnabled(0); //进入工作状态
-	MPU6050_setI2CMasterModeEnabled(0);	 //不让MPU6050 控制AUXI2C
-	MPU6050_setI2CBypassEnabled(0);	 //主控制器的I2C与	MPU6050的AUXI2C	直通。控制器可以直接访问HMC5883L
+uint8_t MPU6050_initialize(void) {
+	if(MPU6050_setClockSource(MPU6050_CLOCK_PLL_YGYRO) == 1) //设置时钟
+	{
+		MPU6050_setFullScaleGyroRange(MPU6050_GYRO_FS_2000);//陀螺仪最大量程 +-2000度每秒
+		MPU6050_setFullScaleAccelRange(MPU6050_ACCEL_FS_2);	//加速度度最大量程 +-2G
+		MPU6050_setSleepEnabled(0); //进入工作状态
+		MPU6050_setI2CMasterModeEnabled(0);	 //不让MPU6050 控制AUXI2C
+		MPU6050_setI2CBypassEnabled(0);	 //主控制器的I2C与	MPU6050的AUXI2C	直通。控制器可以直接访问HMC5883L
+		return 0;
+	}
+	else{
+		printf("[%s] mpu6050 init fail\r\n",__func__);
+		return 1;
+	}
 }
 
 
@@ -251,51 +267,60 @@ void MPU6050_initialize(void) {
 入口参数：无
 返回  值：无
 **************************************************************************/
-void DMP_Init(void)
+int DMP_Init(void)
 { 
-	u8 temp[1]={0};
+	int ret;
+	uint8_t temp[1]={0};
 	i2cRead(0x68,0x75,1,temp);
 	
-	//printf("mpu_set_sensor complete ......\r\n");
-	if(temp[0]!=0x68)NVIC_SystemReset();
-	if(!mpu_init())
+	if(temp[0]!=0x68){
+		printf("[%s] errror!\r\n",__func__);
+		return 1;
+	}
+	printf("mpu_set_sensor complete ......\r\n");
+	ret = mpu_init();
+	if(!ret)
 	{
 		if(!mpu_set_sensors(INV_XYZ_GYRO | INV_XYZ_ACCEL))
 		{
-			//printf("mpu_set_sensor complete ......\r\n");
+			printf("mpu_set_sensor complete ......\r\n");
 		}
 		if(!mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL))
 		{
-			//printf("mpu_configure_fifo complete ......\r\n");
+			printf("mpu_configure_fifo complete ......\r\n");
 		}
 		if(!mpu_set_sample_rate(DEFAULT_MPU_HZ))
 		{
-			//printf("mpu_set_sample_rate complete ......\r\n");
+			printf("mpu_set_sample_rate complete ......\r\n");
 		}
 		if(!dmp_load_motion_driver_firmware())
 		{
-			//printf("dmp_load_motion_driver_firmware complete ......\r\n");
+			printf("dmp_load_motion_driver_firmware complete ......\r\n");
 		}
 		if(!dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation)))
 		{
-			//printf("dmp_set_orientation complete ......\r\n");
+			printf("dmp_set_orientation complete ......\r\n");
 		}
 		if(!dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT | DMP_FEATURE_TAP |
 		DMP_FEATURE_ANDROID_ORIENT | DMP_FEATURE_SEND_RAW_ACCEL | DMP_FEATURE_SEND_CAL_GYRO |
 		DMP_FEATURE_GYRO_CAL))
 		{
-			//printf("dmp_enable_feature complete ......\r\n");
+			printf("dmp_enable_feature complete ......\r\n");
 		}
 		if(!dmp_set_fifo_rate(DEFAULT_MPU_HZ))
 		{
-			//printf("dmp_set_fifo_rate complete ......\r\n");
+			printf("dmp_set_fifo_rate complete ......\r\n");
 		}
 		run_self_test();
 		if(!mpu_set_dmp_state(1))
 		{
-			//printf("mpu_set_dmp_state complete ......\r\n");
+			printf("mpu_set_dmp_state complete ......\r\n");
 		}
 	}
+	else{
+		printf("[%s] mpu_init fail:0x%x\r\n",__func__, ret);
+	}
+	return ret;
 }
 /**************************************************************************
 函数功能：读取MPU6050内置DMP的姿态信息
@@ -328,7 +353,7 @@ void Read_DMP(void)
 int Read_Temperature(void)
 {	   
 	float Temp;
-	Temp=(I2C_ReadOneByte(devAddr,MPU6050_RA_TEMP_OUT_H)<<8)+I2C_ReadOneByte(devAddr,MPU6050_RA_TEMP_OUT_L);
+	Temp=(i2c_get_read_byte_sensor_reg(devAddr,MPU6050_RA_TEMP_OUT_H)<<8)+i2c_get_read_byte_sensor_reg(devAddr,MPU6050_RA_TEMP_OUT_L);
 	if(Temp>32768) Temp-=65536;
 	Temp=(36.53+Temp/340)*10;
 	return (int)Temp;
@@ -352,4 +377,44 @@ void getAngle(float *yaw,float *yaw_acc_error)
 	if(*yaw < 0)
 		*yaw = *yaw+360;
 }
+
+#define MPU6050_TASK_STACK_SIZE    2048
+#define MPU6050_TASK_PRIORITY    1
+static void *mpu6050_stack_task_handle = NULL;
+
+static void i2c_mpu6050_task(void *arg)
+{
+	float yaw,yaw_acc_error;
+	yaw_acc_error = 0;
+	printf("[%s] enter\r\n",__func__);
+	while(1)
+	{
+		getAngle(&yaw, &yaw_acc_error);
+		printf("[%s] yaw:%03f\r\n",__func__, yaw);
+		vTaskDelay(1000/portTICK_RATE_MS);
+	}
+}
+
+int mpu6050_new_init(void)
+{
+	int ret;
+	printf("[%s] enter\r\n",__func__);
+	ret = i2c_master_init();
+	if(ret){
+		printf("[%s] i2c init fail:0x%x\r\n",__func__, ret);
+		return 1;
+	}
+	if(MPU6050_initialize()){
+		printf("[%s] mpu 6050 init fail\r\n",__func__);
+		return 2;
+	}
+	ret = DMP_Init();
+	if(ret){
+		printf("[%s] dmp init fail:0x%x\r\n",__func__, ret);
+		return 3;
+	}
+    xTaskCreate(i2c_mpu6050_task, "mpu 6050 task", MPU6050_TASK_STACK_SIZE, NULL, MPU6050_TASK_PRIORITY, &mpu6050_stack_task_handle);
+    return 0;
+}
+
 //------------------End of File----------------------------

@@ -19,7 +19,7 @@
 
 // #define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
 
-//  return 0: success    other: fail
+//  return 1: success    0: fail
 uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, size_t size)
 {
     if (size == 0) {
@@ -49,16 +49,26 @@ uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd,
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if(ret == ESP_OK)
+        return 1;
+    else{
+        printf("[%s] i2c read fail:0x%x\r\n",__func__, ret);
         return 0;
-    else
-        return 2;
+    }
 }
 
-//  return 0: success    other: fail
+//  return 1: success    0: fail
 uint8_t i2c_read_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd)
 {
     return i2c_read_sensor_reg(dev_addr, reg_addr, data_rd, 1);
 }
+
+uint8_t i2c_get_read_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr)
+{
+    uint8_t reg_val;
+    i2c_read_byte_sensor_reg(dev_addr, reg_addr, &reg_val);
+    return reg_val;
+}
+
 /**
  * @brief test code to operate on BH1750 sensor
  *
@@ -73,7 +83,7 @@ uint8_t i2c_read_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *dat
  * --------|---------------------------|--------------------|--------------------|------|
  */
 
-// return 0:success    other:fail
+// return 1:success    0:fail
 uint8_t i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data)
 {
     int ret;
@@ -86,10 +96,11 @@ uint8_t i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t re
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret == ESP_OK) {
-        return 0;
+        return 1;
     }
     else{
-        return 1;
+        printf("[%s] i2c write fail:0x%x\r\n",__func__, ret);
+        return 0;
     }
 }
 

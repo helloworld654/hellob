@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#define devAddr  0xD0
+// #define devAddr  0xD0    // i2c communication fail for MPU-6050(GY-521)
+#define devAddr  0x68
 
 #define MPU6050_ADDRESS_AD0_LOW     0x68 // address pin low (GND), default for InvenSense evaluation board
 #define MPU6050_ADDRESS_AD0_HIGH    0x69 // address pin high (VCC)
@@ -365,17 +366,19 @@ extern int16_t Gx_offset,Gy_offset,Gz_offset;
 extern float Acc1G_Values; 
 extern float Pitch,Roll,Yaw; 
 
-//¹©Íâ²¿µ÷ÓÃµÄAPI
-void MPU6050_initialize(void);        //³õÊ¼»¯
-uint8_t MPU6050_testConnection(void); //¼ì²âMPU6050ÊÇ·ñ´æÔÚ
-//¶ÁÈ¡ADCÖµ
+//ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½Ãµï¿½API
+uint8_t MPU6050_initialize(void);        //ï¿½ï¿½Ê¼ï¿½ï¿½
+uint8_t MPU6050_testConnection(void); //ï¿½ï¿½ï¿½MPU6050ï¿½Ç·ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½È¡ADCÖµ
 void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
 void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int16_t* gy, int16_t* gz);
-uint8_t MPU6050_getDeviceID(void); //¶ÁÈ¡MPU6050µÄID
-void MPU6050_InitGyro_Offset(void);//³õÊ¼»¯ÍÓÂÝÒÇÆ«ÖÃ
-void DMP_Init(void);
+uint8_t MPU6050_getDeviceID(void); //ï¿½ï¿½È¡MPU6050ï¿½ï¿½ID
+void MPU6050_InitGyro_Offset(void);//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+int DMP_Init(void);
 void Read_DMP(void);
 int Read_Temperature(void);
 void getAngle(float *yaw,float *yaw_acc_error);
+
+int mpu6050_new_init(void);
 
 #endif

@@ -1,15 +1,16 @@
 #ifndef __IOI2C_H
 #define __IOI2C_H
 
-#include "stm32f10x.h"
-#include "delay.h"
+#include <stdint.h>
+// #include "stm32f10x.h"
+// #include "delay.h"
 
-//IO¿Ú²Ù×÷ºê¶¨Òå
+//IOï¿½Ú²ï¿½ï¿½ï¿½ï¿½ê¶¨ï¿½ï¿½
 #define BITBAND(addr, bitnum) ((addr & 0xF0000000)+0x2000000+((addr &0xFFFFF)<<5)+(bitnum<<2)) 
 #define MEM_ADDR(addr)  *((volatile unsigned long  *)(addr)) 
 #define BIT_ADDR(addr, bitnum)   MEM_ADDR(BITBAND(addr, bitnum))  
 
-//IO¿ÚµØÖ·Ó³Éä
+//IOï¿½Úµï¿½Ö·Ó³ï¿½ï¿½
 #define GPIOA_ODR_Addr    (GPIOA_BASE+12) //0x4001080C 
 #define GPIOB_ODR_Addr    (GPIOB_BASE+12) //0x40010C0C 
 #define GPIOC_ODR_Addr    (GPIOC_BASE+12) //0x4001100C 
@@ -26,53 +27,44 @@
 #define GPIOF_IDR_Addr    (GPIOF_BASE+8) //0x40011A08 
 #define GPIOG_IDR_Addr    (GPIOG_BASE+8) //0x40011E08 
 
-#define PCout(n)   BIT_ADDR(GPIOC_ODR_Addr,n)  //Êä³ö 
-#define PCin(n)    BIT_ADDR(GPIOC_IDR_Addr,n)  //ÊäÈë 
+#define PCout(n)   BIT_ADDR(GPIOC_ODR_Addr,n)  //ï¿½ï¿½ï¿½ 
+#define PCin(n)    BIT_ADDR(GPIOC_IDR_Addr,n)  //ï¿½ï¿½ï¿½ï¿½ 
 
-#define PBout(n)   BIT_ADDR(GPIOB_ODR_Addr,n)  //Êä³ö 
-#define PBin(n)    BIT_ADDR(GPIOB_IDR_Addr,n)  //ÊäÈë 
+#define PBout(n)   BIT_ADDR(GPIOB_ODR_Addr,n)  //ï¿½ï¿½ï¿½ 
+#define PBin(n)    BIT_ADDR(GPIOB_IDR_Addr,n)  //ï¿½ï¿½ï¿½ï¿½ 
 
-#define PEout(n)   BIT_ADDR(GPIOE_ODR_Addr,n)  //Êä³ö 
-#define PEin(n)    BIT_ADDR(GPIOE_IDR_Addr,n)  //ÊäÈë 
+#define PEout(n)   BIT_ADDR(GPIOE_ODR_Addr,n)  //ï¿½ï¿½ï¿½ 
+#define PEin(n)    BIT_ADDR(GPIOE_IDR_Addr,n)  //ï¿½ï¿½ï¿½ï¿½ 
 
 
-//IO·½ÏòÉèÖÃ
+//IOï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 /*
 
 CRL(Pin0-7)
 CRH(Pin8-15)
-GPIOE->CRL&=0XFFF0FFFF  ´ú±í½«PE4µÄCNF[1:0]ºÍMODE[1:0]¶¼ÉèÖÃÎª0,0000
-GPIOE->CRL|=8<<4*4      ´ú±í½«1000£¨ÉÏÀ­ÊäÈë£©£¬×óÒÆ16Î»£¬·ÅÖÃÔÚ´ú±íPE4µÄ¼Ä´æÆ÷Î»ÖÃÉÏ
-						      0011£¨¸¡¿ÕÊä³ö 50MHZ£©
+GPIOE->CRL&=0XFFF0FFFF  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PE4ï¿½ï¿½CNF[1:0]ï¿½ï¿½MODE[1:0]ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0,0000
+GPIOE->CRL|=8<<4*4      ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1000ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½16Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´ï¿½ï¿½ï¿½PE4ï¿½Ä¼Ä´ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
+						      0011ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 50MHZï¿½ï¿½
 */
 #define SDA_IN()  {GPIOB->CRH&=0XFFFFFF0F;GPIOB->CRH|=8<<4;}
 #define SDA_OUT() {GPIOB->CRH&=0XFFFFFF0F;GPIOB->CRH|=3<<4;}
 
-//IO²Ù×÷º¯Êý	 
+//IOï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	 
 #define IIC_SCL    PBout(8) //SCL
 #define IIC_SDA    PBout(9) //SDA	 
-#define READ_SDA   PBin(9)  //ÊäÈëSDA 
+#define READ_SDA   PBin(9)  //ï¿½ï¿½ï¿½ï¿½SDA 
 
-//IICËùÓÐ²Ù×÷º¯Êý
-void IIC_Init(void);                //³õÊ¼»¯IICµÄIO¿Ú				 
-int IIC_Start(void);				//·¢ËÍIIC¿ªÊ¼ÐÅºÅ
-void IIC_Stop(void);	  			//·¢ËÍIICÍ£Ö¹ÐÅºÅ
-void IIC_Send_Byte(u8 txd);			//IIC·¢ËÍÒ»¸ö×Ö½Ú
-u8 IIC_Read_Byte(unsigned char ack);//IIC¶ÁÈ¡Ò»¸ö×Ö½Ú
-int IIC_Wait_Ack(void); 				//IICµÈ´ýACKÐÅºÅ
-void IIC_Ack(void);					//IIC·¢ËÍACKÐÅºÅ
-void IIC_NAck(void);				//IIC²»·¢ËÍACKÐÅºÅ
+//IICï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+void IIC_Init(void);                //ï¿½ï¿½Ê¼ï¿½ï¿½IICï¿½ï¿½IOï¿½ï¿½				 
 
-void IIC_Write_One_Byte(u8 daddr,u8 addr,u8 data);
-u8 IIC_Read_One_Byte(u8 daddr,u8 addr);	 
+void IIC_Write_One_Byte(uint8_t daddr,uint8_t addr,uint8_t data);
+uint8_t IIC_Read_One_Byte(uint8_t daddr,uint8_t addr);	 
 unsigned char I2C_Readkey(unsigned char I2C_Addr);
 
-unsigned char I2C_ReadOneByte(unsigned char I2C_Addr,unsigned char addr);
 unsigned char IICwriteByte(unsigned char dev, unsigned char reg, unsigned char data);
-u8 IICwriteBytes(u8 dev, u8 reg, u8 length, u8* data);
-u8 IICwriteBits(u8 dev,u8 reg,u8 bitStart,u8 length,u8 data);
-u8 IICwriteBit(u8 dev,u8 reg,u8 bitNum,u8 data);
-u8 IICreadBytes(u8 dev, u8 reg, u8 length, u8 *data);
+uint8_t IICwriteBytes(uint8_t dev, uint8_t reg, uint8_t length, uint8_t* data);
+uint8_t IICwriteBits(uint8_t dev,uint8_t reg,uint8_t bitStart,uint8_t length,uint8_t data);
+uint8_t IICwriteBit(uint8_t dev,uint8_t reg,uint8_t bitNum,uint8_t data);
 
 int i2cWrite(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *data);
 int i2cRead(uint8_t addr, uint8_t reg, uint8_t len, uint8_t *buf);

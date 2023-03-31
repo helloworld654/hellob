@@ -6,10 +6,6 @@
 #include "mpu_6050_sensor.h"
 #include "i2c_protocol.h"
 
-#define MPU6050_TASK_STACK_SIZE    2048
-#define MPU6050_TASK_PRIORITY    1
-void *mpu6050_stack_task_handle = NULL;
-
 //  accl calcu for +/- 2g range
 #define ACCL_MAX    (65536)
 #define ACCL_MIDDLE    (32768)
@@ -24,7 +20,7 @@ static uint8_t mpu6050_setting_init(void)
 		printf("[%s] i2c master init fail,reason:0x%x\r\n",__func__,ret);
 		return ret;
 	}
-    if(!i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, PWR_MGMT_1, 0x80)) {	//解除休眠状态
+    if(i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, PWR_MGMT_1, 0x80)) {	//解除休眠状态
         vTaskDelay(100/portTICK_RATE_MS);
     	i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, PWR_MGMT_1, 0x00);
         i2c_write_byte_sensor_reg(MPU6050_SENSOR_ADDR, ACCEL_CONFIG,0);    //  +/-2g
@@ -83,6 +79,10 @@ void mpu6050_read_accl(MPU_ACCL_VAL *p_accl_val)
 	// printf("accl_x:%.3f,  accl_y:%.3f,  accl_z:%.3f\r\n",accl_x,accl_y,accl_z);
 }
 
+#define MPU6050_TASK_STACK_SIZE    2048
+#define MPU6050_TASK_PRIORITY    1
+static void *mpu6050_stack_task_handle = NULL;
+
 static void i2c_mpu6050_task(void *arg)
 {
     MPU_ACCL_VAL accl_val;
@@ -95,7 +95,7 @@ static void i2c_mpu6050_task(void *arg)
     vTaskDelete(NULL);
 }
 
-int mpu_6050_sensor_init(void)
+int mpu6050_old_init(void)
 {
 	int ret;
 	ret = mpu6050_setting_init();
