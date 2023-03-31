@@ -1,4 +1,0 @@
-一、简易蓝牙遥控小车
-功能：手上为CENTRAL，带有MPU6050，采集角度后传递给小车，控制小车前进、后退、转弯等功能
-ble_car_0.1：小车端PCB图
-ble_car_cent_01：手上central端PCB图
