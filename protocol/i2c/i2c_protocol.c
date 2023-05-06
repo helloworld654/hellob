@@ -20,7 +20,7 @@
 // #define SENSOR_I2C_ADDR    0x5A   // slave address for joystick
 
 //  return 1: success    0: fail
-uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, size_t size)
+int i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, size_t size)
 {
     if (size == 0) {
         return 3;
@@ -35,7 +35,8 @@ uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd,
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
     if (ret != ESP_OK) {
-        return 1;
+        printf("[%s] write reg fail:0x%x\r\n",__func__, ret);
+        return ret;
     }
 
     cmd = i2c_cmd_link_create();
@@ -48,12 +49,10 @@ uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd,
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
-    if(ret == ESP_OK)
-        return 1;
-    else{
-        printf("[%s] i2c read fail:0x%x\r\n",__func__, ret);
-        return 0;
+    if (ret != ESP_OK) {
+        printf("[%s] read fail:0x%x\r\n",__func__, ret);
     }
+    return ret;
 }
 
 //  return 1: success    0: fail
@@ -84,7 +83,7 @@ uint8_t i2c_get_read_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr)
  */
 
 // return 1:success    0:fail
-uint8_t i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data)
+int i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data)
 {
     int ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -95,13 +94,7 @@ uint8_t i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t re
     i2c_master_stop(cmd);
     ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
     i2c_cmd_link_delete(cmd);
-    if (ret == ESP_OK) {
-        return 1;
-    }
-    else{
-        printf("[%s] i2c write fail:0x%x\r\n",__func__, ret);
-        return 0;
-    }
+    return ret;
 }
 
 /**

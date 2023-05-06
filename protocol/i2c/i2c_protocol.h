@@ -27,9 +27,9 @@
 
 esp_err_t i2c_master_init(void);
 
-uint8_t i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, size_t size);
+int i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, size_t size);
 
-uint8_t i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data);
+int i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_data);
 
 uint8_t i2c_get_read_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr);
 
