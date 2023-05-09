@@ -68,6 +68,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set addr pin SUCCESS.\n");
     
     /* init */
     res = mpu6050_init(&gs_handle);
@@ -77,6 +79,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: init SUCCESS.\n");
     
     /* delay 100 ms */
     mpu6050_interface_delay_ms(100);
@@ -90,6 +94,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set sleep disable SUCCESS.\n");
     
     /* set the default clock source */
     res = mpu6050_set_clock_source(&gs_handle, MPU6050_BASIC_DEFAULT_CLOCK_SOURCE);
@@ -100,6 +106,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set clock source SUCCESS.\n");
     
     /* set the default rate */
     res = mpu6050_set_sample_rate_divider(&gs_handle, 1000 / (MPU6050_BASIC_DEFAULT_RATE - 1));
@@ -110,6 +118,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set sample rate divider SUCCESS.\n");
     
     /* set the default low pass filter */
     res = mpu6050_set_low_pass_filter(&gs_handle, MPU6050_BASIC_DEFAULT_LOW_PASS_FILTER);
@@ -120,6 +130,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set low pass filter SUCCESS.\n");
     
     /* enable temperature sensor */
     res = mpu6050_set_temperature_sensor(&gs_handle, MPU6050_BOOL_TRUE);
@@ -130,6 +142,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set temperture sensor SUCCESS.\n");
     
     /* set the default cycle wake up */
     res = mpu6050_set_cycle_wake_up(&gs_handle, MPU6050_BASIC_DEFAULT_CYCLE_WAKE_UP);
@@ -140,6 +154,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set cycle wake up SUCCESS.\n");
     
     /* set the default wake up frequency */
     res = mpu6050_set_wake_up_frequency(&gs_handle, MPU6050_BASIC_DEFAULT_WAKE_UP_FREQUENCY);
@@ -150,6 +166,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set wake up frequency SUCCESS.\n");
     
     /* enable acc x */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_ACC_X, MPU6050_BOOL_FALSE);
@@ -160,6 +178,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for ACC_X SUCCESS.\n");
     
     /* enable acc y */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_ACC_Y, MPU6050_BOOL_FALSE);
@@ -170,6 +190,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for ACC_Y SUCCESS.\n");
     
     /* enable acc z */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_ACC_Z, MPU6050_BOOL_FALSE);
@@ -180,6 +202,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for ACC_Z SUCCESS.\n");
     
     /* enable gyro x */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_GYRO_X, MPU6050_BOOL_FALSE);
@@ -190,6 +214,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for GYRO_X SUCCESS.\n");
     
     /* enable gyro y */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_GYRO_Y, MPU6050_BOOL_FALSE);
@@ -200,6 +226,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for GYRO_Y SUCCESS.\n");
     
     /* enable gyro z */
     res = mpu6050_set_standby_mode(&gs_handle, MPU6050_SOURCE_GYRO_Z, MPU6050_BOOL_FALSE);
@@ -210,6 +238,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("mpu6050: set standby mode for GYRO_Z SUCCESS.\n");
     
     /* disable gyroscope x test */
     res = mpu6050_set_gyroscope_test(&gs_handle, MPU6050_AXIS_X, MPU6050_BOOL_FALSE);

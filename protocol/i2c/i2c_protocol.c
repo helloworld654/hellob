@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
+#include "freertos/FreeRTOS.h"
 #include "freertos/timers.h"
 #include "i2c_protocol.h"
 
@@ -32,7 +33,7 @@ int i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, siz
     i2c_master_write_byte(cmd, dev_addr << 1 | WRITE_BIT, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     if (ret != ESP_OK) {
         printf("[%s] write reg fail:0x%x\r\n",__func__, ret);
@@ -47,7 +48,7 @@ int i2c_read_sensor_reg(uint8_t dev_addr, uint8_t reg_addr,uint8_t *data_rd, siz
     }
     i2c_master_read_byte(cmd, data_rd + size - 1, NACK_VAL);
     i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     if (ret != ESP_OK) {
         printf("[%s] read fail:0x%x\r\n",__func__, ret);
@@ -92,7 +93,7 @@ int i2c_write_byte_sensor_reg(uint8_t dev_addr, uint8_t reg_addr, uint8_t reg_da
     i2c_master_write_byte(cmd, reg_addr, ACK_CHECK_EN);
     i2c_master_write_byte(cmd, reg_data, ACK_CHECK_EN);
     i2c_master_stop(cmd);
-    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_RATE_MS);
+    ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
     i2c_cmd_link_delete(cmd);
     return ret;
 }
