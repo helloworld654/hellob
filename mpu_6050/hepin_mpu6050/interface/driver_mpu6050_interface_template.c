@@ -53,27 +53,6 @@
 #define MPU9250_RESET_BIT                   7
 
 /**
- * @brief Read a sequence of bytes from a MPU9250 sensor registers
- */
-static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data, size_t len)
-{
-    return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg_addr, 1, data, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-}
-
-/**
- * @brief Write a byte to a MPU9250 sensor register
- */
-static esp_err_t mpu9250_register_write_byte(uint8_t reg_addr, uint8_t data)
-{
-    int ret;
-    uint8_t write_buf[2] = {reg_addr, data};
-
-    ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, write_buf, sizeof(write_buf), I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
-
-    return ret;
-}
-
-/**
  * @brief i2c master initialization
  */
 static esp_err_t i2c_master_init(void)
@@ -93,26 +72,6 @@ static esp_err_t i2c_master_init(void)
 
     return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
 }
-
-#if 0
-void app_main(void)
-{
-    uint8_t data[2];
-    ESP_ERROR_CHECK(i2c_master_init());
-    ESP_LOGI(TAG, "I2C initialized successfully");
-
-    /* Read the MPU9250 WHO_AM_I register, on power up the register should have the value 0x71 */
-    ESP_ERROR_CHECK(mpu9250_register_read(MPU9250_WHO_AM_I_REG_ADDR, data, 1));
-    ESP_LOGI(TAG, "WHO_AM_I = %X", data[0]);
-
-    /* Demonstrate writing by reseting the MPU9250 */
-    ESP_ERROR_CHECK(mpu9250_register_write_byte(MPU9250_PWR_MGMT_1_REG_ADDR, 1 << MPU9250_RESET_BIT));
-
-    ESP_ERROR_CHECK(i2c_driver_delete(I2C_MASTER_NUM));
-    ESP_LOGI(TAG, "I2C de-initialized successfully");
-    printf("[%s] compile date:%s,time:%s\r\n",__func__,__DATE__,__TIME__);
-}
-#endif
 
 /**
  * @brief  interface iic bus init
@@ -152,8 +111,7 @@ uint8_t mpu6050_interface_iic_deinit(void)
  */
 uint8_t mpu6050_interface_iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len)
 {
-    mpu9250_register_read(reg, buf, len);
-    return 0;
+    return i2c_master_write_read_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, &reg, 1, buf, len, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
 }
 
 /**
@@ -169,11 +127,18 @@ uint8_t mpu6050_interface_iic_read(uint8_t addr, uint8_t reg, uint8_t *buf, uint
  */
 uint8_t mpu6050_interface_iic_write(uint8_t addr, uint8_t reg, uint8_t *buf, uint16_t len)
 {
-    int i;
-    for(i=0; i<len; i++){
-        mpu9250_register_write_byte(reg, buf[i]);
+    int ret;
+    uint8_t *p_data = NULL;
+    if(!len){
+        printf("[%s] len == 0\r\n", __func__);
+        return 1;
     }
-    return 0;
+    p_data = (uint8_t *)malloc(len+1);
+    p_data[0] = reg;
+    memcpy(p_data+1, buf, len);
+    ret = i2c_master_write_to_device(I2C_MASTER_NUM, MPU9250_SENSOR_ADDR, p_data, len+1, I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS);
+    free(p_data);
+    return ret;
 }
 
 /**

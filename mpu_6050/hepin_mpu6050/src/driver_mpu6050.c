@@ -3791,7 +3791,7 @@ uint8_t mpu6050_init(mpu6050_handle_t *handle)
     res = a_mpu6050_iic_write(handle, MPU6050_REG_PWR_MGMT_1, &prev, 1);            /* write pwr mgmt 1 */
     if (res != 0)                                                                   /* check the result */
     {
-        handle->debug_print("mpu6050: write pwr mgmt 1 failed.\n");                 /* write pwr mgmt 1 failed */
+        handle->debug_print("[%s] mpu6050: write pwr mgmt 1 failed.\n", __func__);                 /* write pwr mgmt 1 failed */
         (void)handle->iic_deinit();                                                 /* iic deinit */
 
         return 4;                                                                   /* return error */
@@ -3852,7 +3852,7 @@ uint8_t mpu6050_deinit(mpu6050_handle_t *handle)
     res = a_mpu6050_iic_write(handle, MPU6050_REG_PWR_MGMT_1, &prev, 1);            /* write pwr mgmt 1 */
     if (res != 0)                                                                   /* check the result */
     {
-        handle->debug_print("mpu6050: write pwr mgmt 1 failed.\n");                 /* write pwr mgmt 1 failed */
+        handle->debug_print("[%s] mpu6050: write pwr mgmt 1 failed.\n", __func__);                 /* write pwr mgmt 1 failed */
 
         return 4;                                                                   /* return error */
     }
@@ -7705,7 +7705,7 @@ uint8_t mpu6050_self_test(mpu6050_handle_t *handle, int32_t gyro_offset_raw[3], 
     res = a_mpu6050_iic_write(handle, MPU6050_REG_PWR_MGMT_1, &prev, 1);                   /* write pwr mgmt 1 */
     if (res != 0)                                                                          /* check the result */
     {
-        handle->debug_print("mpu6050: write pwr mgmt 1 failed.\n");                        /* write pwr mgmt 1 failed */
+        handle->debug_print("[%s] mpu6050: write pwr mgmt 1 failed.\n", __func__);                        /* write pwr mgmt 1 failed */
 
         return 1;                                                                          /* return error */
     }

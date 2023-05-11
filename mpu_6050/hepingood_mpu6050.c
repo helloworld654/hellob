@@ -7,7 +7,7 @@
 #include "driver_mpu6050_interface.h"
 #include "driver_mpu6050_basic.h"
 
-#define MPU6050_TASK_STACK_SIZE    2048
+#define MPU6050_TASK_STACK_SIZE    4096
 #define MPU6050_TASK_PRIORITY    1
 static void *mpu6050_stack_task_handle = NULL;
 

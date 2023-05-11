@@ -520,6 +520,8 @@ uint8_t mpu6050_basic_init(mpu6050_address_t addr_pin)
        
         return 1;
     }
+    else
+        mpu6050_interface_debug_print("[%s] mpu6050 init FINISHED\r\n\r\n", __func__);
     
     return 0;
 }
