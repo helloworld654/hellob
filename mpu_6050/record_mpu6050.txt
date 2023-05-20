@@ -1,5 +1,11 @@
 mpu6050 test
 
+2023-0520  record
+参考 https://github.com/hepingood/mpu6050 移植mpu6050功能
+mpu6050_basic_init 可以成功
+但是dmp读取角度测试失败，调用 mpu6050_dmp_init 失败
+暂时停下
+
 2023-0405
 mpu_6050_sensor.c and mpu_6050_sensor.h
 可以成功读出MPU6050的3个值，并且可以随位置而改变
